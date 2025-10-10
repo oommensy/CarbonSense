@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarbonSense - Track Your Carbon Footprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#059669',
+                        secondary: '#0891b2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+        }
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Landing Page -->
+    <div id="landingPage" class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">🌱 CarbonSense</h1>
+                    </div>
+                    <button onclick="showAuthModal()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
+                    Track Your <span class="text-green-600">Carbon Footprint</span>
+                </h1>
+                <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    AI-powered carbon tracking that helps you understand and reduce your environmental impact. 
+                    Make every action count towards a sustainable future.
+                </p>
+                <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                    <button onclick="showAuthModal()" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10 transition-colors">
+                        Start Tracking Today
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="mt-20">
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Feature 1 -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Smart Tracking</h3>
+                        <p class="text-gray-600">Automatically track your daily activities and calculate their carbon impact with AI-powered analysis.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-2xl">⚡</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">AI Recommendations</h3>
+                        <p class="text-gray-600">Get personalized suggestions to reduce your carbon footprint based on your lifestyle patterns.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-2xl">🏆</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Achievement System</h3>
+                        <p class="text-gray-600">Stay motivated with gamified achievements and track your progress towards sustainability goals.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="mt-20 bg-white rounded-lg shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">Making a Real Impact</h2>
+                    <p class="mt-2 text-gray-600">Join thousands of users reducing their carbon footprint</p>
+                </div>
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600">2.5M</div>
+                        <div class="text-gray-600">kg CO₂ Reduced</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">15K+</div>
+                        <div class="text-gray-600">Active Users</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-600">98%</div>
+                        <div class="text-gray-600">User Satisfaction</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dashboard (hidden initially) -->
+    <div id="dashboard" class="hidden min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">🌱 CarbonSense</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <span class="text-gray-700">Welcome, <span id="userName">John Doe</span></span>
+                            <div class="text-xs text-gray-500" id="userProfile">
+                                <span id="userAge">35</span>yo, <span id="userHousehold">2</span> people, <span id="userLocation">urban</span>
+                            </div>
+                        </div>
+                        <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Total Emissions</h3>
+                    <p class="text-3xl font-bold text-red-600"><span id="totalEmissions">125.6</span> kg CO₂</p>
+                    <p class="text-sm text-gray-500 mt-1">This month</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Weekly Average</h3>
+                    <p class="text-3xl font-bold text-orange-600"><span id="weeklyEmissions">18.3</span> kg CO₂</p>
+                    <p class="text-sm text-gray-500 mt-1">Last 7 days</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Monthly Target</h3>
+                    <p class="text-3xl font-bold text-green-600"><span id="monthlyTarget">75.2</span> kg CO₂</p>
+                    <p class="text-sm text-gray-500 mt-1">Goal: 100 kg CO₂</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Recent Activities -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-medium text-gray-900">Recent Activities</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4" id="recentActivities">
+                            <!-- Activities will be populated by JavaScript -->
+                        </div>
+                        <button onclick="showTrackingModal()" class="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                            Track New Activity
+                        </button>
+                        
+                        <!-- Quick Actions for common activities (learning from failed apps) -->
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Quick Actions</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="addQuickActivity('commute')" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md hover:bg-blue-200">
+                                    🚗 Daily Commute
+                                </button>
+                                <button onclick="addQuickActivity('lunch')" class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md hover:bg-orange-200">
+                                    🥩 Lunch Meal
+                                </button>
+                                <button onclick="addQuickActivity('coffee')" class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md hover:bg-yellow-200">
+                                    ☕ Coffee Run
+                                </button>
+                                <button onclick="addQuickActivity('shopping')" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-md hover:bg-green-200">
+                                    🛒 Shopping Trip
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <p class="mt-2 text-xs text-gray-500 text-center">
+                            Calculations based on UK DEFRA 2024, US EPA 2022, and IPCC guidelines
+                        </p>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-medium text-gray-900">AI Recommendations</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3" id="recommendations">
+                            <!-- Recommendations will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="mt-8 bg-white rounded-lg shadow">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-medium text-gray-900">Achievements</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="achievements">
+                        <!-- Achievements will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Motivation Section (learning from failed apps) -->
+            <div class="mt-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">🎯 Your Progress</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-green-600" id="userStreak">3</div>
+                        <div class="text-sm text-gray-600">Day Streak</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-blue-600" id="userImprovement">15%</div>
+                        <div class="text-sm text-gray-600">Improvement</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600" id="userRanking">Top 32%</div>
+                        <div class="text-sm text-gray-600">In Your Area</div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-700">🌟 Keep it up! You're making a real difference.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900" id="modalTitle">Sign In</h2>
+                <button onclick="hideAuthModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+
+            <div id="authError" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded"></div>
+
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div id="signupFields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="fullName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                            <input type="number" id="userAge" min="13" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Household Size</label>
+                            <select id="householdSize" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="1">1 person</option>
+                                <option value="2" selected>2 people</option>
+                                <option value="3">3 people</option>
+                                <option value="4">4 people</option>
+                                <option value="5">5+ people</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Location Type</label>
+                        <select id="locationType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="urban" selected>Urban (City)</option>
+                            <option value="suburban">Suburban</option>
+                            <option value="rural">Rural</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <span id="submitText">Sign In</span>
+                </button>
+            </form>
+
+            <!-- Demo Credentials Info -->
+            <div id="demoCredentials" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 class="text-sm font-medium text-blue-800 mb-2">Try Demo Account:</h4>
+                <div class="text-xs text-blue-700 space-y-1">
+                    <div><strong>Email:</strong> demo@carbonsense.app</div>
+                    <div><strong>Password:</strong> demo123</div>
+                </div>
+                <button onclick="fillDemoCredentials()" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                    Use Demo Account
+                </button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button onclick="toggleAuthMode()" class="text-green-600 hover:text-green-700 text-sm" id="toggleText">
+                    Don't have an account? Sign up
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carbon Tracking Modal -->
+    <div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Track Activity</h2>
+                <button onclick="hideTrackingModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+
+            <form id="trackingForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Activity Category</label>
+                    <select id="activityCategory" required onchange="updateSubcategories()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">Select a category</option>
+                        <option value="transportation">🚗 Transportation</option>
+                        <option value="energy">⚡ Energy Usage</option>
+                        <option value="food">🍽️ Food Consumption</option>
+                        <option value="waste">🗑️ Waste</option>
+                    </select>
+                </div>
+
+                <div id="subcategoryDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Specific Activity</label>
+                    <select id="activitySubcategory" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">Select specific activity</option>
+                    </select>
+                </div>
+
+                <div id="amountDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <span id="amountLabel">Amount</span>
+                        <span id="unitLabel" class="text-gray-500"></span>
+                    </label>
+                    <input type="number" id="activityAmount" required step="0.1" placeholder="Enter amount" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div id="descriptionDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                    <input type="text" id="activityDescription" placeholder="e.g., Morning commute, Lunch, etc." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <div id="emissionPreview" class="hidden p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p class="text-sm text-green-800">
+                        <strong>Estimated CO₂:</strong> <span id="previewEmission">0</span> kg
+                    </p>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400" disabled>
+                    Calculate & Save
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let currentUser = null;
+        let isLoginMode = true;
+        let isDemoMode = true; // Flag to control demo data
+        
+        // Real user activities start empty
+        let activities = [];
+        
+        // Demo data for showcase (separate from user data)
+        const demoActivities = [
+            { id: 'demo1', type: 'Transportation - Car', emissions: 12.5, date: '2024-01-15', isDemo: true },
+            { id: 'demo2', type: 'Energy - Electricity', emissions: 8.3, date: '2024-01-14', isDemo: true },
+            { id: 'demo3', type: 'Food - Meat', emissions: 6.7, date: '2024-01-14', isDemo: true }
+        ];
+
+        // Dynamic AI Recommendations Engine
+        function generatePersonalizedRecommendations() {
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const demoActivities = activities.filter(activity => activity.isDemo);
+            const analysisData = userActivities.length > 0 ? userActivities : demoActivities;
+            
+            if (analysisData.length === 0) {
+                return [
+                    'Start tracking your daily activities to get personalized recommendations',
+                    'Add your first carbon footprint activity to begin',
+                    'Log transportation, food, and energy usage for smart insights'
+                ];
+            }
+
+            const recommendations = [];
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const recentActivities = analysisData.filter(activity => new Date(activity.date) >= oneWeekAgo);
+            
+            // Analyze activity patterns
+            const activityByType = {};
+            let totalEmissions = 0;
+            
+            analysisData.forEach(activity => {
+                const type = activity.type.split(' - ')[0]; // Get main category
+                if (!activityByType[type]) {
+                    activityByType[type] = { count: 0, emissions: 0, types: new Set() };
+                }
+                activityByType[type].count++;
+                activityByType[type].emissions += activity.emissions;
+                activityByType[type].types.add(activity.type);
+                totalEmissions += activity.emissions;
+            });
+
+            // Sort categories by emissions impact
+            const sortedCategories = Object.entries(activityByType)
+                .sort(([,a], [,b]) => b.emissions - a.emissions);
+
+            // Transportation recommendations
+            if (activityByType.Transportation) {
+                const transData = activityByType.Transportation;
+                const avgEmissions = transData.emissions / transData.count;
+                
+                if (avgEmissions > 15) {
+                    recommendations.push('🚗 Consider carpooling or public transport - your transport emissions are higher than average');
+                } else if (transData.types.has('Transportation - Car')) {
+                    recommendations.push('🚌 Try public transport 2-3 days per week to reduce car usage');
+                } else if (transData.count > 10) {
+                    recommendations.push('🚴 Add cycling or walking for short trips under 5km');
+                }
+            } else {
+                recommendations.push('🚗 Track your daily commute to identify carbon reduction opportunities');
+            }
+
+            // Food recommendations
+            if (activityByType.Food) {
+                const foodData = activityByType.Food;
+                const hasMeat = [...foodData.types].some(type => type.includes('Meat'));
+                const avgEmissions = foodData.emissions / foodData.count;
+                
+                if (hasMeat && avgEmissions > 5) {
+                    recommendations.push('🥗 Try "Meatless Monday" - replace 1 meat meal with plant-based alternatives');
+                } else if (hasMeat) {
+                    recommendations.push('🐟 Consider sustainable seafood or poultry instead of red meat');
+                } else if (avgEmissions > 3) {
+                    recommendations.push('🥬 Focus on local, seasonal produce to reduce food transport emissions');
+                } else {
+                    recommendations.push('👏 Great job with low-carbon food choices! Keep it up');
+                }
+            } else {
+                recommendations.push('🍽️ Track your meals to get personalized food sustainability tips');
+            }
+
+            // Energy recommendations
+            if (activityByType.Energy) {
+                const energyData = activityByType.Energy;
+                const avgEmissions = energyData.emissions / energyData.count;
+                
+                if (avgEmissions > 10) {
+                    recommendations.push('💡 Switch to LED bulbs and unplug devices when not in use');
+                } else if (avgEmissions > 5) {
+                    recommendations.push('🌡️ Adjust thermostat by 2°C to save energy and reduce emissions');
+                } else {
+                    recommendations.push('⚡ Consider renewable energy options for your home');
+                }
+            } else {
+                recommendations.push('🏠 Track home energy usage to identify efficiency opportunities');
+            }
+
+            // Time-based recommendations
+            const hour = now.getHours();
+            if (hour >= 7 && hour <= 9) {
+                recommendations.push('🌅 Morning commute tip: Check for carpool options or public transport apps');
+            } else if (hour >= 17 && hour <= 19) {
+                recommendations.push('🌆 Evening tip: Plan tomorrow\'s sustainable transport options');
+            } else if (hour >= 11 && hour <= 14) {
+                recommendations.push('🍽️ Lunch time: Consider a plant-based meal to reduce your daily footprint');
+            }
+
+            // Weekly pattern analysis
+            const dayOfWeek = now.getDay();
+            if (dayOfWeek === 1 && recentActivities.length > 0) { // Monday
+                const weekendEmissions = recentActivities
+                    .filter(a => {
+                        const activityDay = new Date(a.date).getDay();
+                        return activityDay === 0 || activityDay === 6; // Sunday or Saturday
+                    })
+                    .reduce((sum, a) => sum + a.emissions, 0);
+                
+                if (weekendEmissions > totalEmissions * 0.4) {
+                    recommendations.push('📅 Weekend activities had high emissions - plan lower-carbon weekend activities');
+                }
+            }
+
+            // Achievement-based recommendations
+            if (analysisData.length >= 7) {
+                const weeklyAvg = totalEmissions / Math.ceil(analysisData.length / 7);
+                if (weeklyAvg < 50) {
+                    recommendations.push('🏆 You\'re on track! Consider sharing your success to inspire others');
+                } else {
+                    recommendations.push('📊 Aim to reduce weekly emissions by 10% - small changes add up!');
+                }
+            }
+
+            // Seasonal recommendations
+            const month = now.getMonth();
+            if (month >= 11 || month <= 1) { // Winter
+                recommendations.push('❄️ Winter tip: Layer clothing instead of increasing heating');
+            } else if (month >= 5 && month <= 7) { // Summer
+                recommendations.push('☀️ Summer tip: Use fans instead of AC when possible');
+            }
+
+            // Limit to 5 most relevant recommendations
+            return recommendations.slice(0, 5);
+        }
+
+        const achievements = [
+            { id: '1', title: 'First Steps', description: 'Track your first carbon activity', achieved: true },
+            { id: '2', title: 'Week Warrior', description: 'Log activities for 7 consecutive days', achieved: false },
+            { id: '3', title: 'Carbon Reducer', description: 'Reduce weekly emissions by 10%', achieved: false }
+        ];
+
+        // Carbon emission factors (kg CO2 per unit) - Based on official sources
+        // Sources: UK DEFRA 2024, US EPA 2024, IPCC Guidelines
+        const emissionFactors = {
+            transportation: {
+                car_petrol: 0.168, // per km - UK DEFRA 2024
+                car_diesel: 0.164, // per km - UK DEFRA 2024
+                car: 0.168,        // Default to petrol
+                bus: 0.082,        // per km - UK DEFRA 2024 (updated from 0.05)
+                train: 0.041,      // per km - IPCC/DEFRA
+                flight: 0.246      // per km - UK DEFRA 2024
+            },
+            energy: {
+                electricity: 0.393, // per kWh - US EPA 2022 national average
+                electricity_clean: 0.02, // per kWh - renewables
+                electricity_coal: 0.85,  // per kWh - coal grid
+                gas: 2.04 // per kWh - natural gas
+            },
+            food: {
+                beef: 27.0,        // per kg - IPCC range 20-50, using conservative
+                chicken: 6.9,      // per kg - IPCC
+                pork: 12.1,        // per kg - research average  
+                meat: 15.0,        // per kg - average across types
+                dairy: 3.2,        // per kg - IPCC upper range
+                vegetables: 1.0,   // per kg - IPCC average (updated from 0.4)
+                grains: 1.4        // per kg - research average
+            },
+            waste: {
+                landfill: 0.57,    // per kg - landfill methane emissions
+                recycling: 0.1,    // per kg - recycling processing
+                general: 0.5       // per kg - mixed waste average
+            }
+        };
+
+        // Modal Functions
+        function showAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('authModal').classList.add('flex');
+        }
+
+        function hideAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('flex');
+            clearAuthForm();
+        }
+
+        function showTrackingModal() {
+            document.getElementById('trackingModal').classList.remove('hidden');
+            document.getElementById('trackingModal').classList.add('flex');
+        }
+
+        function hideTrackingModal() {
+            document.getElementById('trackingModal').classList.add('hidden');
+            document.getElementById('trackingModal').classList.remove('flex');
+            document.getElementById('trackingForm').reset();
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            const signupFields = document.getElementById('signupFields');
+            const modalTitle = document.getElementById('modalTitle');
+            const submitText = document.getElementById('submitText');
+            const toggleText = document.getElementById('toggleText');
+            const demoCredentials = document.getElementById('demoCredentials');
+
+            if (isLoginMode) {
+                signupFields.classList.add('hidden');
+                demoCredentials.classList.remove('hidden');
+                modalTitle.textContent = 'Sign In';
+                submitText.textContent = 'Sign In';
+                toggleText.textContent = "Don't have an account? Sign up";
+            } else {
+                signupFields.classList.remove('hidden');
+                demoCredentials.classList.add('hidden');
+                modalTitle.textContent = 'Create Account';
+                submitText.textContent = 'Create Account';
+                toggleText.textContent = 'Already have an account? Sign in';
+            }
+        }
+
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'demo@carbonsense.app';
+            document.getElementById('password').value = 'demo123';
+        }
+
+        function clearAuthForm() {
+            document.getElementById('authForm').reset();
+            document.getElementById('authError').classList.add('hidden');
+            // Reset to login mode
+            isLoginMode = true;
+            toggleAuthMode();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        // Simple hash function - in real app, use proper bcrypt
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            return hash.toString();
+        }
+
+        // Simple User Database (in real app, this would be backend database)
+        const users = JSON.parse(localStorage.getItem('carbonSenseUsers') || '{}');
+        
+        // Initialize with demo accounts if none exist
+        if (Object.keys(users).length === 0) {
+            users['demo@carbonsense.app'] = {
+                email: 'demo@carbonsense.app',
+                password: hashPassword('demo123'),
+                full_name: 'Demo User',
+                username: 'demouser',
+                age: 35,
+                household_size: 2,
+                location_type: 'urban',
+                created_at: new Date().toISOString()
+            };
+            users['john@example.com'] = {
+                email: 'john@example.com',
+                password: hashPassword('password'),
+                full_name: 'John Doe',
+                username: 'johndoe',
+                age: 42,
+                household_size: 4,
+                location_type: 'suburban',
+                created_at: new Date().toISOString()
+            };
+            localStorage.setItem('carbonSenseUsers', JSON.stringify(users));
+        }
+        
+        // Authentication Functions
+        function hashPassword(password) {
+            // Simple hash function - in real app, use proper bcrypt
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            return hash.toString();
+        }
+        
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function validatePassword(password) {
+            // Require at least 6 characters
+            return password.length >= 6;
+        }
+        
+        function register(email, password, fullName, username, age, householdSize, locationType) {
+            if (!validateEmail(email)) {
+                showError('Please enter a valid email address');
+                return false;
+            }
+            
+            if (!validatePassword(password)) {
+                showError('Password must be at least 6 characters long');
+                return false;
+            }
+            
+            if (!fullName || fullName.length < 2) {
+                showError('Please enter your full name');
+                return false;
+            }
+            
+            if (!username || username.length < 3) {
+                showError('Username must be at least 3 characters long');
+                return false;
+            }
+            
+            if (!age || age < 13 || age > 100) {
+                showError('Please enter a valid age (13-100)');
+                return false;
+            }
+            
+            if (users[email]) {
+                showError('An account with this email already exists');
+                return false;
+            }
+            
+            // Check if username is taken
+            for (const user of Object.values(users)) {
+                if (user.username === username) {
+                    showError('This username is already taken');
+                    return false;
+                }
+            }
+            
+            // Create new user with demographic data
+            users[email] = {
+                email: email,
+                password: hashPassword(password),
+                full_name: fullName,
+                username: username,
+                age: parseInt(age),
+                household_size: parseInt(householdSize),
+                location_type: locationType,
+                created_at: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('carbonSenseUsers', JSON.stringify(users));
+            
+            // Auto-login after registration
+            currentUser = {
+                email: email,
+                full_name: fullName,
+                username: username,
+                age: parseInt(age),
+                household_size: parseInt(householdSize),
+                location_type: locationType
+            };
+            
+            showDashboard();
+            hideAuthModal();
+            return true;
+        }
+        
+        function login(email, password) {
+            if (!validateEmail(email)) {
+                showError('Please enter a valid email address');
+                return false;
+            }
+            
+            if (!password) {
+                showError('Please enter your password');
+                return false;
+            }
+            
+            const user = users[email];
+            if (!user) {
+                showError('No account found with this email address');
+                return false;
+            }
+            
+            if (user.password !== hashPassword(password)) {
+                showError('Incorrect password');
+                return false;
+            }
+            
+            currentUser = {
+                email: user.email,
+                full_name: user.full_name,
+                username: user.username,
+                age: user.age || 35, // Default age if not provided
+                household_size: user.household_size || 2, // Default household size
+                location_type: user.location_type || 'urban' // Default location type
+            };
+            
+            showDashboard();
+            hideAuthModal();
+            return true;
+        }
+
+        function logout() {
+            currentUser = null;
+            showLandingPage();
+        }
+
+        // Page Navigation
+        function showLandingPage() {
+            document.getElementById('landingPage').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            // Update user name and profile
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.full_name;
+                document.getElementById('userAge').textContent = currentUser.age || 35;
+                document.getElementById('userHousehold').textContent = currentUser.household_size || 2;
+                document.getElementById('userLocation').textContent = currentUser.location_type || 'urban';
+            }
+            
+            populateDashboard();
+            
+            // Show welcome message for new users
+            if (activities.length === 0 && isDemoMode) {
+                setTimeout(() => {
+                    showWelcomeModal();
+                }, 500);
+            }
+        }
+
+        function showWelcomeModal() {
+            const welcomeMessage = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="welcomeModal">
+                    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">🌱</div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-4">Welcome to CarbonSense!</h2>
+                            <p class="text-gray-600 mb-6">
+                                We're showing you demo data to help you understand the app. 
+                                Ready to start tracking your real carbon footprint?
+                            </p>
+                            <div class="space-y-3">
+                                <button onclick="startFreshUser()" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                                    Start Fresh (Hide Demo Data)
+                                </button>
+                                <button onclick="continueWithDemo()" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300">
+                                    Continue with Demo Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', welcomeMessage);
+        }
+
+        function startFreshUser() {
+            isDemoMode = false;
+            populateActivities();
+            updateStats();
+            updateProgressMotivation();
+            document.getElementById('welcomeModal').remove();
+        }
+
+        function continueWithDemo() {
+            document.getElementById('welcomeModal').remove();
+        }
+
+        // Dashboard Functions
+        function populateDashboard() {
+            populateActivities();
+            populateRecommendations();
+            populateAchievements();
+            updateStats();
+            updateProgressMotivation(); // Learning from failed apps
+        }
+
+        function updateProgressMotivation() {
+            const progress = showProgressMotivation();
+            document.getElementById('userStreak').textContent = progress.streak;
+            document.getElementById('userImprovement').textContent = progress.improvement;
+            document.getElementById('userRanking').textContent = progress.compared.split(' ').slice(2, 4).join(' '); // Extract percentage
+        }
+
+        function populateActivities() {
+            const container = document.getElementById('recentActivities');
+            container.innerHTML = '';
+            
+            // Get activities to display (demo + real activities)
+            const displayActivities = isDemoMode ? [...demoActivities, ...activities] : activities;
+            
+            if (displayActivities.length === 0) {
+                // Show empty state with call to action
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">🌱</div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Start Your Carbon Journey</h3>
+                        <p class="text-sm mb-4">Track your first activity to see your environmental impact</p>
+                        <button onclick="showTrackingModal()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                            Add Your First Activity
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            displayActivities.forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.className = `flex justify-between items-center ${activity.isDemo ? 'opacity-60' : ''}`;
+                activityDiv.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-900">
+                            ${activity.type} ${activity.isDemo ? '<span class="text-xs text-blue-600">(Demo)</span>' : ''}
+                        </p>
+                        <p class="text-sm text-gray-500">${activity.date}</p>
+                    </div>
+                    <span class="text-lg font-semibold text-red-600">${activity.emissions} kg CO₂</span>
+                `;
+                container.appendChild(activityDiv);
+            });
+            
+            // Add demo mode toggle
+            if (isDemoMode && activities.length === 0) {
+                const toggleDiv = document.createElement('div');
+                toggleDiv.className = 'mt-4 pt-4 border-t border-gray-200';
+                toggleDiv.innerHTML = `
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Showing demo data</span>
+                        <button onclick="toggleDemoMode()" class="text-blue-600 hover:text-blue-700">
+                            Hide Demo Data
+                        </button>
+                    </div>
+                `;
+                container.appendChild(toggleDiv);
+            }
+        }
+
+        function populateRecommendations() {
+            const container = document.getElementById('recommendations');
+            container.innerHTML = '';
+            
+            // Generate fresh, personalized recommendations
+            const personalizedRecommendations = generatePersonalizedRecommendations();
+            
+            personalizedRecommendations.forEach(recommendation => {
+                const recDiv = document.createElement('div');
+                recDiv.className = 'flex items-start';
+                recDiv.innerHTML = `
+                    <div class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
+                    <p class="text-gray-700">${recommendation}</p>
+                `;
+                container.appendChild(recDiv);
+            });
+        }
+
+        function populateAchievements() {
+            const container = document.getElementById('achievements');
+            container.innerHTML = '';
+            
+            achievements.forEach(achievement => {
+                const achievementDiv = document.createElement('div');
+                achievementDiv.className = `p-4 rounded-lg border-2 ${achievement.achieved ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}`;
+                achievementDiv.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <div class="w-6 h-6 rounded-full mr-2 ${achievement.achieved ? 'bg-green-500' : 'bg-gray-300'} flex items-center justify-center">
+                            ${achievement.achieved ? '<span class="text-white text-xs">✓</span>' : ''}
+                        </div>
+                        <h4 class="font-medium text-gray-900">${achievement.title}</h4>
+                    </div>
+                    <p class="text-sm text-gray-600">${achievement.description}</p>
+                `;
+                container.appendChild(achievementDiv);
+            });
+        }
+
+        function updateStats() {
+            // Get activities to calculate (demo + real activities)
+            const calculateActivities = isDemoMode ? [...demoActivities, ...activities] : activities;
+            
+            const total = calculateActivities.reduce((sum, activity) => sum + activity.emissions, 0);
+            const weekly = calculateActivities.filter(a => {
+                const activityDate = new Date(a.date);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return activityDate >= weekAgo;
+            }).reduce((sum, activity) => sum + activity.emissions, 0);
+
+            document.getElementById('totalEmissions').textContent = total.toFixed(1);
+            document.getElementById('weeklyEmissions').textContent = weekly.toFixed(1);
+            
+            // Update monthly target based on real vs demo
+            const targetElement = document.getElementById('monthlyTarget');
+            if (isDemoMode && activities.length === 0) {
+                targetElement.textContent = '75.2'; // Demo target
+            } else {
+                targetElement.textContent = (total * 1.2).toFixed(1); // Dynamic target
+            }
+        }
+
+        function toggleDemoMode() {
+            isDemoMode = !isDemoMode;
+            populateActivities();
+            updateStats();
+            updateProgressMotivation();
+            populateRecommendations(); // Update recommendations when switching modes
+        }
+
+        // Activity tracking configuration with specific emission factors
+        const activityConfig = {
+            transportation: {
+                label: 'Transportation',
+                subcategories: {
+                    'car_petrol': { name: '🚗 Petrol Car', factor: 0.168, unit: 'km', label: 'Distance' },
+                    'car_diesel': { name: '🚗 Diesel Car', factor: 0.164, unit: 'km', label: 'Distance' },
+                    'car_electric': { name: '🔋 Electric Car', factor: 0.05, unit: 'km', label: 'Distance' },
+                    'bus': { name: '🚌 Bus', factor: 0.082, unit: 'km', label: 'Distance' },
+                    'train': { name: '🚆 Train', factor: 0.041, unit: 'km', label: 'Distance' },
+                    'flight_domestic': { name: '✈️ Domestic Flight', factor: 0.246, unit: 'km', label: 'Distance' },
+                    'flight_international': { name: '🌍 International Flight', factor: 0.298, unit: 'km', label: 'Distance' },
+                    'motorcycle': { name: '🏍️ Motorcycle', factor: 0.103, unit: 'km', label: 'Distance' },
+                    'bicycle': { name: '🚴 Bicycle', factor: 0, unit: 'km', label: 'Distance' },
+                    'walking': { name: '🚶 Walking', factor: 0, unit: 'km', label: 'Distance' }
+                }
+            },
+            energy: {
+                label: 'Energy Usage',
+                subcategories: {
+                    'electricity_grid': { name: '⚡ Grid Electricity', factor: 0.393, unit: 'kWh', label: 'Energy Used' },
+                    'electricity_renewable': { name: '🌱 Renewable Energy', factor: 0.02, unit: 'kWh', label: 'Energy Used' },
+                    'natural_gas': { name: '🔥 Natural Gas', factor: 2.04, unit: 'kWh', label: 'Energy Used' },
+                    'heating_oil': { name: '🛢️ Heating Oil', factor: 2.68, unit: 'kWh', label: 'Energy Used' },
+                    'propane': { name: '🔵 Propane', factor: 1.51, unit: 'kWh', label: 'Energy Used' }
+                }
+            },
+            food: {
+                label: 'Food Consumption',
+                subcategories: {
+                    'beef': { name: '🥩 Beef', factor: 27.0, unit: 'kg', label: 'Weight/Serving' },
+                    'lamb': { name: '🐑 Lamb', factor: 39.2, unit: 'kg', label: 'Weight/Serving' },
+                    'pork': { name: '🐷 Pork', factor: 12.1, unit: 'kg', label: 'Weight/Serving' },
+                    'chicken': { name: '🐔 Chicken', factor: 6.9, unit: 'kg', label: 'Weight/Serving' },
+                    'fish': { name: '🐟 Fish', factor: 6.1, unit: 'kg', label: 'Weight/Serving' },
+                    'dairy': { name: '🥛 Dairy Products', factor: 3.2, unit: 'kg', label: 'Weight/Serving' },
+                    'eggs': { name: '🥚 Eggs', factor: 4.2, unit: 'kg', label: 'Weight/Serving' },
+                    'vegetables': { name: '🥬 Vegetables', factor: 1.0, unit: 'kg', label: 'Weight/Serving' },
+                    'fruits': { name: '🍎 Fruits', factor: 1.1, unit: 'kg', label: 'Weight/Serving' },
+                    'grains': { name: '🌾 Grains/Cereals', factor: 1.4, unit: 'kg', label: 'Weight/Serving' }
+                }
+            },
+            waste: {
+                label: 'Waste',
+                subcategories: {
+                    'landfill': { name: '🗑️ Landfill Waste', factor: 0.57, unit: 'kg', label: 'Weight' },
+                    'recycling': { name: '♻️ Recycling', factor: 0.1, unit: 'kg', label: 'Weight' },
+                    'organic': { name: '🌿 Organic Waste', factor: 0.3, unit: 'kg', label: 'Weight' },
+                    'electronic': { name: '💻 Electronic Waste', factor: 2.5, unit: 'kg', label: 'Weight' }
+                }
+            }
+        };
+
+        function updateSubcategories() {
+            const category = document.getElementById('activityCategory').value;
+            const subcategorySelect = document.getElementById('activitySubcategory');
+            const subcategoryDiv = document.getElementById('subcategoryDiv');
+            const amountDiv = document.getElementById('amountDiv');
+            const descriptionDiv = document.getElementById('descriptionDiv');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Reset
+            subcategorySelect.innerHTML = '<option value="">Select specific activity</option>';
+            subcategoryDiv.classList.add('hidden');
+            amountDiv.classList.add('hidden');
+            descriptionDiv.classList.add('hidden');
+            submitBtn.disabled = true;
+
+            if (category && activityConfig[category]) {
+                const subcategories = activityConfig[category].subcategories;
+                
+                // Populate subcategories
+                Object.keys(subcategories).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = subcategories[key].name;
+                    subcategorySelect.appendChild(option);
+                });
+
+                subcategoryDiv.classList.remove('hidden');
+            }
+        }
+
+        function updateAmountField() {
+            const category = document.getElementById('activityCategory').value;
+            const subcategory = document.getElementById('activitySubcategory').value;
+            const amountDiv = document.getElementById('amountDiv');
+            const descriptionDiv = document.getElementById('descriptionDiv');
+            const amountLabel = document.getElementById('amountLabel');
+            const unitLabel = document.getElementById('unitLabel');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (category && subcategory && activityConfig[category]?.subcategories[subcategory]) {
+                const config = activityConfig[category].subcategories[subcategory];
+                
+                amountLabel.textContent = config.label;
+                unitLabel.textContent = `(${config.unit})`;
+                
+                amountDiv.classList.remove('hidden');
+                descriptionDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+
+                // Add real-time calculation preview
+                updateEmissionPreview();
+            }
+        }
+
+        function updateEmissionPreview() {
+            const category = document.getElementById('activityCategory').value;
+            const subcategory = document.getElementById('activitySubcategory').value;
+            const amount = parseFloat(document.getElementById('activityAmount').value) || 0;
+            const previewDiv = document.getElementById('emissionPreview');
+            const previewSpan = document.getElementById('previewEmission');
+
+            if (amount > 0 && category && subcategory && activityConfig[category]?.subcategories[subcategory]) {
+                const factor = activityConfig[category].subcategories[subcategory].factor;
+                const emission = (amount * factor).toFixed(2);
+                
+                previewSpan.textContent = emission;
+                previewDiv.classList.remove('hidden');
+            } else {
+                previewDiv.classList.add('hidden');
+            }
+        }
+
+        // Add event listeners for real-time updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const subcategorySelect = document.getElementById('activitySubcategory');
+            const amountInput = document.getElementById('activityAmount');
+            
+            if (subcategorySelect) {
+                subcategorySelect.addEventListener('change', updateAmountField);
+            }
+            
+            if (amountInput) {
+                amountInput.addEventListener('input', updateEmissionPreview);
+            }
+        });
+
+        function calculateEmissions(type, subtype, amount) {
+            const factor = emissionFactors[type]?.[subtype] || 1;
+            return factor * amount;
+        }
+
+        function addActivity(category, subcategory, amount, description = '') {
+            // Use the new structured calculation
+            if (!activityConfig[category]?.subcategories[subcategory]) {
+                console.error('Invalid activity configuration');
+                return;
+            }
+            
+            const config = activityConfig[category].subcategories[subcategory];
+            const emissions = amount * config.factor;
+            
+            const activityName = config.name.replace(/^[^\s]+\s/, ''); // Remove emoji
+            const displayName = description ? 
+                `${activityName} - ${description}` : 
+                `${activityName} (${amount} ${config.unit})`;
+            
+            const newActivity = {
+                id: Date.now().toString(),
+                type: displayName,
+                category: category,
+                subcategory: subcategory,
+                amount: amount,
+                unit: config.unit,
+                emissions: Math.round(emissions * 100) / 100, // Round to 2 decimal places
+                date: new Date().toISOString().split('T')[0],
+                description: description
+            };
+            
+            activities.unshift(newActivity);
+            populateActivities();
+            updateStats();
+            
+            // Update AI recommendations based on new activity
+            populateRecommendations();
+            
+            // Show immediate impact feedback (learning from failed apps)
+            showImpactFeedback(newActivity);
+            
+            // Check for achievements
+            checkAchievements();
+        }
+
+        function showImpactFeedback(activity) {
+            const phoneEquivalent = Math.round(activity.emissions * 100);
+            const treeEquivalent = Math.round(activity.emissions * 0.039 * 10) / 10;
+            
+            const feedbackMessages = [
+                `💡 That's equivalent to charging ${phoneEquivalent} phones`,
+                `🌳 ${treeEquivalent} trees could offset this activity`,
+                `📊 You're tracking ${activities.length} activities - great progress!`
+            ];
+            
+            const randomMessage = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
+            
+            // Show success message with impact context
+            alert(`✅ Activity tracked! ${activity.emissions} kg CO₂\n${randomMessage}`);
+        }
+
+        function checkAchievements() {
+            const unlockedAchievements = [];
+            
+            // First activity achievement
+            if (activities.length === 1) {
+                unlockedAchievements.push('🎯 Data Explorer - Logged your first activity!');
+                achievements[0].achieved = true;
+            }
+            
+            // Consistency achievement (simplified for demo)
+            if (activities.length >= 3) {
+                unlockedAchievements.push('🔥 Activity Champion - 3 activities logged!');
+                achievements[1].achieved = true;
+            }
+            
+            // Low carbon day achievement
+            const todaysActivities = activities.filter(a => a.date === new Date().toISOString().split('T')[0]);
+            const todaysTotal = todaysActivities.reduce((sum, a) => sum + a.emissions, 0);
+            if (todaysTotal > 0 && todaysTotal < 5) {
+                unlockedAchievements.push('🌱 Eco Warrior - Low carbon day achieved!');
+                achievements[2].achieved = true;
+            }
+            
+            // Show achievement notifications
+            if (unlockedAchievements.length > 0) {
+                setTimeout(() => {
+                    alert('🏆 Achievement Unlocked!\n' + unlockedAchievements.join('\n'));
+                    populateAchievements();
+                }, 1000);
+            }
+        }
+
+        // Quick action functions (learning from failed apps - reduce manual entry)
+        function addQuickActivity(type) {
+            const quickActivities = {
+                commute: { type: 'transportation', description: '20km daily commute', amount: 20, emoji: '🚗' },
+                lunch: { type: 'food', description: '0.3kg meat meal', amount: 0.3, emoji: '🥩' },
+                coffee: { type: 'transportation', description: '2km coffee run', amount: 2, emoji: '☕' },
+                shopping: { type: 'transportation', description: '8km shopping trip', amount: 8, emoji: '🛒' }
+            };
+            
+            const activity = quickActivities[type];
+            if (activity) {
+                addActivity(activity.type, activity.description, activity.amount);
+            }
+        }
+
+        // Smart suggestions based on time (learning from failed apps)
+        function getSuggestedActivities() {
+            const hour = new Date().getHours();
+            const day = new Date().getDay();
+            
+            if (hour >= 7 && hour <= 9 && day >= 1 && day <= 5) {
+                return [{ text: "🚗 Morning commute to work?", type: "commute" }];
+            } else if (hour >= 12 && hour <= 14) {
+                return [{ text: "🍽️ Lunch meal tracking?", type: "lunch" }];
+            } else if (hour >= 17 && hour <= 19 && day >= 1 && day <= 5) {
+                return [{ text: "🚗 Evening commute home?", type: "commute" }];
+            }
+            return [];
+        }
+
+        // Show user progress and motivation (learning from failed apps)
+        function showProgressMotivation() {
+            const totalDays = Math.ceil((new Date() - new Date(activities[activities.length - 1]?.date || new Date())) / (1000 * 60 * 60 * 24));
+            const avgDaily = activities.length > 0 ? (activities.reduce((sum, a) => sum + a.emissions, 0) / Math.max(totalDays, 1)).toFixed(1) : 0;
+            
+            return {
+                streak: Math.min(totalDays, 7), // Simplified streak calculation
+                improvement: activities.length > 5 ? "15%" : "Track more to see trends",
+                compared: "Better than 68% of users in your area",
+                avgDaily: avgDaily
+            };
+        }
+
+        // Event Listeners
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (isLoginMode) {
+                login(email, password);
+            } else {
+                const fullName = document.getElementById('fullName').value;
+                const username = document.getElementById('username').value;
+                const age = document.getElementById('userAge').value;
+                const householdSize = document.getElementById('householdSize').value;
+                const locationType = document.getElementById('locationType').value;
+                register(email, password, fullName, username, age, householdSize, locationType);
+            }
+        });
+
+        document.getElementById('trackingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const category = document.getElementById('activityCategory').value;
+            const subcategory = document.getElementById('activitySubcategory').value;
+            const amount = parseFloat(document.getElementById('activityAmount').value);
+            const description = document.getElementById('activityDescription').value;
+            
+            if (category && subcategory && amount > 0) {
+                addActivity(category, subcategory, amount, description);
+                hideTrackingModal();
+                
+                // Reset form
+                document.getElementById('trackingForm').reset();
+                document.getElementById('subcategoryDiv').classList.add('hidden');
+                document.getElementById('amountDiv').classList.add('hidden');
+                document.getElementById('descriptionDiv').classList.add('hidden');
+                document.getElementById('emissionPreview').classList.add('hidden');
+                document.getElementById('submitBtn').disabled = true;
+            }
+        });
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            showLandingPage();
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                hideAuthModal();
+                hideTrackingModal();
+            }
+        });
+    </script>
+</body>
+</html>

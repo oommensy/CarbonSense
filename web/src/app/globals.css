@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CarbonSense Corporate Dashboard Styles */
+:root {
+  --primary-green: #2E7D32;
+  --secondary-green: #4CAF50;
+  --accent-coral: #FF8A65;
+  --background-gray: #F5F5F5;
+  --surface-white: #FFFFFF;
+  --text-dark: #333333;
+  --text-gray: #666666;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--background-gray);
+  color: var(--text-dark);
+}
+
+.carbon-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.carbon-button-primary {
+  @apply bg-green-700 hover:bg-green-800 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+}
+
+.carbon-button-secondary {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors;
+}
