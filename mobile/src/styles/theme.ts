@@ -1,12 +1,14 @@
 export const theme = {
   colors: {
     primary: '#2E7D32', // Forest Green
+    primaryLight: '#C8E6C9', // Light Green
     secondary: '#4CAF50', // Light Green
     accent: '#FF8A65', // Coral
     background: '#F5F5F5',
     surface: '#FFFFFF',
     text: '#333333',
     textSecondary: '#666666',
+    border: '#E0E0E0', // Light Gray Border
     error: '#F44336',
     success: '#4CAF50',
     warning: '#FF9800',

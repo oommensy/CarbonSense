@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
-import userSlice from './slices/userSlice';
-import carbonSlice from './slices/carbonSlice';
-import challengesSlice from './slices/challengesSlice';
+import carbonReducer from './slices/carbonSlice';
+import userReducer from './slices/userSlice';
+import challengesReducer from './slices/challengesSlice';
+import socialReducer from './slices/socialSlice';
 
 export const store = configureStore({
   reducer: {
-    user: userSlice,
-    carbon: carbonSlice,
-    challenges: challengesSlice,
+    carbon: carbonReducer,
+    user: userReducer,
+    challenges: challengesReducer,
+    social: socialReducer,
   },
 });
 

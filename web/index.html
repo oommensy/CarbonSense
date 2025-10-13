@@ -35,19 +35,49 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover {
+            text-decoration: none;
+        }
+        .tab-content {
+            animation: fadeIn 0.3s ease-in;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Landing Page -->
     <div id="landingPage" class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <!-- Header -->
+        <!-- Header with Live Activity Ticker -->
         <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Live Activity Ticker -->
+                <div class="bg-green-100 px-4 py-2 text-center">
+                    <div class="flex items-center justify-center space-x-6 text-sm text-green-800">
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                            <span id="todayActions">1,847 climate actions today!</span>
+                        </div>
+                        <div class="hidden md:block">•</div>
+                        <div class="hidden md:flex items-center">
+                            <span id="carbonSaved">🌱 2,500,000 kg CO₂ saved by our community</span>
+                        </div>
+                        <div class="hidden lg:block">•</div>
+                        <div class="hidden lg:flex items-center">
+                            <span id="onlineUsers">15,234 climate warriors online</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center">
                         <h1 class="text-2xl font-bold text-gray-900">🌱 CarbonSense</h1>
+                        <span class="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            <span id="liveUserCount">15,234</span> online
+                        </span>
                     </div>
-                    <button onclick="showAuthModal()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors">
+                    <button onclick="showAuthModal()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors shadow-lg">
                         Get Started
                     </button>
                 </div>
@@ -55,73 +85,348 @@
         </header>
 
         <!-- Hero Section -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="text-center">
-                <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-                    Track Your <span class="text-green-600">Carbon Footprint</span>
-                </h1>
-                <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                    AI-powered carbon tracking that helps you understand and reduce your environmental impact. 
-                    Make every action count towards a sustainable future.
-                </p>
-                <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                    <button onclick="showAuthModal()" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10 transition-colors">
-                        Start Tracking Today
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Hero Section with Social Proof -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">
+                        Join the Climate
+                        <span class="text-green-600"> Social Movement</span>
+                    </h1>
+                    <p class="mt-4 text-xl text-gray-600">
+                        Connect with 15,000+ climate warriors. Share achievements, compete in challenges, and make saving the planet social and fun! 🎯
+                    </p>
+                    
+                    <!-- Social Proof Pills -->
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+                            🏆 #1 Climate App
+                        </div>
+                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                            ⭐ 4.9/5 Rating
+                        </div>
+                        <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                            🔥 Trending #ClimateAction
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                        <button onclick="showAuthModal()" class="flex-1 bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors shadow-lg font-semibold">
+                            Start Your Climate Journey 🚀
+                        </button>
+                        <button onclick="showDemoTour()" class="flex-1 bg-white text-green-600 border-2 border-green-600 px-8 py-3 rounded-lg hover:bg-green-50 transition-colors font-semibold">
+                            Watch How It Works 📺
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Community Feed -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">🌟 Live Community</h3>
+                        <span class="text-green-600 text-sm font-medium">Real-time updates</span>
+                    </div>
+                    
+                    <div id="recentAchievements" class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <span class="text-green-600 font-semibold text-sm">S</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-800">
+                                    <span class="font-semibold">Sarah</span> went car-free for a week
+                                </p>
+                                <p class="text-xs text-gray-500">2 min ago • Saved 45kg CO₂</p>
+                            </div>
+                            <div class="text-green-600">
+                                <span class="text-xs">🌱</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span class="text-blue-600 font-semibold text-sm">M</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-800">
+                                    <span class="font-semibold">Mike</span> installed solar panels
+                                </p>
+                                <p class="text-xs text-gray-500">5 min ago • Saved 120kg CO₂</p>
+                            </div>
+                            <div class="text-green-600">
+                                <span class="text-xs">🌱</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span class="text-purple-600 font-semibold text-sm">E</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-800">
+                                    <span class="font-semibold">Emma</span> started composting
+                                </p>
+                                <p class="text-xs text-gray-500">8 min ago • Saved 15kg CO₂</p>
+                            </div>
+                            <div class="text-green-600">
+                                <span class="text-xs">🌱</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                <span class="text-orange-600 font-semibold text-sm">A</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-800">
+                                    <span class="font-semibold">Alex</span> biked to work
+                                </p>
+                                <p class="text-xs text-gray-500">12 min ago • Saved 8kg CO₂</p>
+                            </div>
+                            <div class="text-green-600">
+                                <span class="text-xs">🌱</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="showAuthModal()" class="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                        Join the conversation 💬
                     </button>
                 </div>
             </div>
 
-            <!-- Features Section -->
-            <div class="mt-20">
-                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    <!-- Feature 1 -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                            <span class="text-2xl">📊</span>
+            <!-- Trending Challenges Section -->
+            <div class="mb-16">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">🔥 Trending Climate Challenges</h2>
+                    <p class="mt-2 text-gray-600">Join thousands taking action right now!</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">🚲</span>
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-semibold">
+                                🔥 HOT
+                            </span>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Smart Tracking</h3>
-                        <p class="text-gray-600">Automatically track your daily activities and calculate their carbon impact with AI-powered analysis.</p>
+                        <h3 class="font-bold text-gray-900 mb-2">Car-Free Week</h3>
+                        <p class="text-green-600 font-semibold text-sm mb-3" id="carFreeCount">
+                            2,847 people joined today
+                        </p>
+                        <div class="bg-gray-100 text-gray-700 text-xs p-2 rounded mb-3">
+                            ⏰ 12 days left to join!
+                        </div>
+                        <button onclick="showAuthModal()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
+                            Join Challenge 🎯
+                        </button>
                     </div>
 
-                    <!-- Feature 2 -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                            <span class="text-2xl">⚡</span>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">🌱</span>
+                            <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-semibold">
+                                � RISING
+                            </span>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">AI Recommendations</h3>
-                        <p class="text-gray-600">Get personalized suggestions to reduce your carbon footprint based on your lifestyle patterns.</p>
+                        <h3 class="font-bold text-gray-900 mb-2">Plant-Based Month</h3>
+                        <p class="text-blue-600 font-semibold text-sm mb-3" id="plantBasedCount">
+                            1,923 people joined today
+                        </p>
+                        <div class="bg-gray-100 text-gray-700 text-xs p-2 rounded mb-3">
+                            ⏰ 18 days left to join!
+                        </div>
+                        <button onclick="showAuthModal()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                            Join Challenge 🎯
+                        </button>
                     </div>
 
-                    <!-- Feature 3 -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                            <span class="text-2xl">🏆</span>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">♻️</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-semibold">
+                                ✨ NEW
+                            </span>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Achievement System</h3>
-                        <p class="text-gray-600">Stay motivated with gamified achievements and track your progress towards sustainability goals.</p>
+                        <h3 class="font-bold text-gray-900 mb-2">Zero Waste Challenge</h3>
+                        <p class="text-purple-600 font-semibold text-sm mb-3" id="zeroWasteCount">
+                            1,456 people joined today
+                        </p>
+                        <div class="bg-gray-100 text-gray-700 text-xs p-2 rounded mb-3">
+                            ⏰ 25 days left to join!
+                        </div>
+                        <button onclick="showAuthModal()" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm">
+                            Join Challenge 🎯
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Stats Section -->
-            <div class="mt-20 bg-white rounded-lg shadow-lg p-8">
+            <!-- Social Features Preview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">📱 Like Instagram, but for Climate</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
+                                <span class="text-green-600 text-sm">📸</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Share Your Climate Wins</h4>
+                                <p class="text-gray-600 text-sm">Post photos of your bike rides, plant-based meals, and solar panels</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                                <span class="text-blue-600 text-sm">👥</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Follow Climate Warriors</h4>
+                                <p class="text-gray-600 text-sm">Connect with friends and discover inspiring climate leaders</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mt-1">
+                                <span class="text-purple-600 text-sm">�</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Compete & Get Rewards</h4>
+                                <p class="text-gray-600 text-sm">Climb leaderboards, earn badges, unlock achievements</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mock Phone Interface -->
+                <div class="flex justify-center">
+                    <div class="w-64 bg-white rounded-3xl shadow-2xl p-4">
+                        <div class="bg-gray-100 rounded-2xl p-4 space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-green-200 rounded-full"></div>
+                                <div>
+                                    <div class="w-20 h-2 bg-gray-300 rounded"></div>
+                                    <div class="w-16 h-1 bg-gray-200 rounded mt-1"></div>
+                                </div>
+                            </div>
+                            <div class="w-full h-32 bg-gradient-to-r from-green-200 to-blue-200 rounded-lg flex items-center justify-center">
+                                <span class="text-2xl">📸🌱</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <div class="flex space-x-2">
+                                    <span>❤️</span>
+                                    <span>💬</span>
+                                    <span>🔄</span>
+                                </div>
+                                <span>🌱</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOMO Section -->
+            <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl shadow-lg p-8 text-white text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">⏰ Don't Miss Out!</h2>
+                <p class="text-xl mb-6">
+                    This month: Join the <span class="font-bold">Car-Free Challenge</span> with 5,000+ participants
+                </p>
+                <div class="flex justify-center space-x-8 mb-6">
+                    <div>
+                        <div class="text-2xl font-bold" id="daysLeft">12</div>
+                        <div class="text-sm opacity-90">Days Left</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" id="joinedToday">2,847</div>
+                        <div class="text-sm opacity-90">Joined Today</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" id="co2SavedChallenge">456k</div>
+                        <div class="text-sm opacity-90">kg CO₂ Saved</div>
+                    </div>
+                </div>
+                <button onclick="showAuthModal()" class="bg-white text-green-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg">
+                    Join Before It's Too Late! 🚀
+                </button>
+            </div>
+
+            <!-- Social Proof Testimonials -->
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">💬 What Climate Warriors Say</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold">
+                                S
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-900">Sarah K.</h4>
+                                <div class="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 italic">
+                            "The community challenges motivated me to reduce my carbon footprint by 40%! Love competing with friends 🏆"
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
+                                M
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-900">Mike R.</h4>
+                                <div class="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 italic">
+                            "Finally, an app that makes climate action social and fun! My whole family is now competing 😄"
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold">
+                                E
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-900">Emma L.</h4>
+                                <div class="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 italic">
+                            "Sharing my solar panel installation got 200 likes! Inspiring others feels amazing 🌞"
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Stats with Animation -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-900">Making a Real Impact</h2>
-                    <p class="mt-2 text-gray-600">Join thousands of users reducing their carbon footprint</p>
+                    <h2 class="text-3xl font-bold text-gray-900">🌍 Join the Movement</h2>
+                    <p class="mt-2 text-gray-600">Real impact, real community, real change</p>
                 </div>
                 <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-green-600">2.5M</div>
-                        <div class="text-gray-600">kg CO₂ Reduced</div>
+                        <div class="text-3xl font-bold text-green-600" id="totalCO2">2.5M</div>
+                        <div class="text-gray-600">kg CO₂ Reduced Together</div>
+                        <div class="text-xs text-green-600 mt-1">+456kg today!</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-blue-600">15K+</div>
-                        <div class="text-gray-600">Active Users</div>
+                        <div class="text-3xl font-bold text-blue-600" id="activeUsersCount">15,234</div>
+                        <div class="text-gray-600">Climate Warriors</div>
+                        <div class="text-xs text-blue-600 mt-1">+127 joined today!</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-purple-600">98%</div>
-                        <div class="text-gray-600">User Satisfaction</div>
+                        <div class="text-3xl font-bold text-purple-600" id="challengesCompleted">8,456</div>
+                        <div class="text-gray-600">Challenges Completed</div>
+                        <div class="text-xs text-purple-600 mt-1">+89 this week!</div>
                     </div>
+                </div>
+                <div class="text-center mt-8">
+                    <button onclick="showAuthModal()" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-12 py-4 rounded-xl hover:shadow-lg transition-all duration-300 font-bold text-lg">
+                        Start Your Climate Journey Today! 🌱✨
+                    </button>
                 </div>
             </div>
         </main>
@@ -151,7 +456,34 @@
             </div>
         </header>
 
-        <!-- Main Dashboard Content -->
+        <!-- Navigation Tabs -->
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-8">
+                    <button onclick="showTab('overview')" id="tab-overview" class="tab-btn py-4 px-1 border-b-2 border-green-500 text-green-600 font-medium text-sm">
+                        📊 Overview
+                    </button>
+                    <button onclick="showTab('social')" id="tab-social" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
+                        👥 Social Feed
+                    </button>
+                    <button onclick="showTab('challenges')" id="tab-challenges" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
+                        🏆 Challenges
+                    </button>
+                    <button onclick="showTab('friends')" id="tab-friends" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
+                        🤝 Friends
+                    </button>
+                    <button onclick="showTab('achievements')" id="tab-achievements" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
+                        🎖️ Achievements
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tab Content Container -->
+        <div id="tabContent">
+            <!-- Overview Tab (Default) -->
+            <div id="overview-tab" class="tab-content">
+                <!-- Main Dashboard Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Overview Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -257,7 +589,378 @@
                     <p class="text-sm text-gray-700">🌟 Keep it up! You're making a real difference.</p>
                 </div>
             </div>
-        </main>
+            </main>
+            </div>
+
+            <!-- Social Feed Tab -->
+            <div id="social-tab" class="tab-content hidden">
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Main Feed -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-lg shadow mb-6">
+                                <div class="p-6">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-4">📝 Share Your Climate Win</h3>
+                                    <textarea placeholder="What climate action did you take today? 🌱" class="w-full p-3 border rounded-lg resize-none" rows="3"></textarea>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <div class="flex space-x-2 text-sm text-gray-500">
+                                            <button class="hover:text-green-600">📸 Photo</button>
+                                            <button class="hover:text-green-600">📍 Location</button>
+                                            <button class="hover:text-green-600">🏷️ Tag Friends</button>
+                                        </div>
+                                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Post</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Social Feed Posts -->
+                            <div class="space-y-6" id="socialFeedPosts">
+                                <!-- Post 1 -->
+                                <div class="bg-white rounded-lg shadow">
+                                    <div class="p-6">
+                                        <div class="flex items-center space-x-3 mb-4">
+                                            <div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
+                                                <span class="font-bold text-green-600">S</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Sarah Martinez</h4>
+                                                <p class="text-sm text-gray-500">2 hours ago</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-gray-800 mb-4">Just completed my first car-free week! 🚲✨ Biked to work every day and saved 45kg of CO₂. Feeling amazing and my legs are getting stronger! Who's joining the challenge? #CarFreeWeek #ClimateAction</p>
+                                        <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg p-4 mb-4">
+                                            <div class="text-center">
+                                                <div class="text-2xl">🚲</div>
+                                                <div class="text-sm font-semibold text-gray-700">Car-Free Week Complete!</div>
+                                                <div class="text-xs text-gray-600">45kg CO₂ Saved</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-sm text-gray-500">
+                                            <div class="flex space-x-4">
+                                                <button class="flex items-center space-x-1 hover:text-green-600">
+                                                    <span>❤️</span>
+                                                    <span>47</span>
+                                                </button>
+                                                <button class="flex items-center space-x-1 hover:text-blue-600">
+                                                    <span>💬</span>
+                                                    <span>12</span>
+                                                </button>
+                                                <button class="flex items-center space-x-1 hover:text-purple-600">
+                                                    <span>🔄</span>
+                                                    <span>8</span>
+                                                </button>
+                                            </div>
+                                            <button class="hover:text-gray-700">🔖</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Post 2 -->
+                                <div class="bg-white rounded-lg shadow">
+                                    <div class="p-6">
+                                        <div class="flex items-center space-x-3 mb-4">
+                                            <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center">
+                                                <span class="font-bold text-blue-600">M</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Mike Chen</h4>
+                                                <p class="text-sm text-gray-500">4 hours ago</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-gray-800 mb-4">Solar panels are FINALLY installed! ☀️⚡ The whole process took 3 months but seeing that first day of clean energy generation is incredible. Already generating 120kg CO₂ savings this week!</p>
+                                        <div class="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg p-4 mb-4">
+                                            <div class="text-center">
+                                                <div class="text-2xl">☀️</div>
+                                                <div class="text-sm font-semibold text-gray-700">Solar Installation Complete!</div>
+                                                <div class="text-xs text-gray-600">120kg CO₂ Saved This Week</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-sm text-gray-500">
+                                            <div class="flex space-x-4">
+                                                <button class="flex items-center space-x-1 hover:text-green-600">
+                                                    <span>❤️</span>
+                                                    <span>89</span>
+                                                </button>
+                                                <button class="flex items-center space-x-1 hover:text-blue-600">
+                                                    <span>💬</span>
+                                                    <span>23</span>
+                                                </button>
+                                                <button class="flex items-center space-x-1 hover:text-purple-600">
+                                                    <span>🔄</span>
+                                                    <span>15</span>
+                                                </button>
+                                            </div>
+                                            <button class="hover:text-gray-700">🔖</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="space-y-6">
+                            <!-- Trending Topics -->
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h3 class="text-lg font-bold text-gray-900 mb-4">🔥 Trending</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-700">#CarFreeWeek</span>
+                                        <span class="text-xs text-green-600">2.8k posts</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-700">#SolarPower</span>
+                                        <span class="text-xs text-green-600">1.2k posts</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-700">#PlantBased</span>
+                                        <span class="text-xs text-green-600">956 posts</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Community Stats -->
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Community Impact</h3>
+                                <div class="space-y-3">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-green-600">2.5M</div>
+                                        <div class="text-sm text-gray-600">kg CO₂ Saved Together</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-blue-600">15.2K</div>
+                                        <div class="text-sm text-gray-600">Active Members</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-purple-600">1,847</div>
+                                        <div class="text-sm text-gray-600">Actions Today</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Other tabs content would go here -->
+            <div id="challenges-tab" class="tab-content hidden">
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">🏆 Active Challenges</h2>
+                    <p class="text-gray-600">Challenge content coming soon...</p>
+                </main>
+            </div>
+
+            <div id="friends-tab" class="tab-content hidden">
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">🤝 Your Friends</h2>
+                    <p class="text-gray-600">Friends content coming soon...</p>
+                </main>
+            </div>
+
+            <div id="achievements-tab" class="tab-content hidden">
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">🎖️ Achievements</h2>
+                    <p class="text-gray-600">Achievements content coming soon...</p>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Tour Modal -->
+    <div id="demoTourModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg max-w-4xl w-full mx-4 animate-slide-up">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-2xl font-bold text-gray-900">🎬 How CarbonSense Works</h2>
+                <button onclick="hideDemoTour()" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+            </div>
+
+            <!-- Demo Content -->
+            <div class="p-6">
+                <!-- Demo Steps Navigation -->
+                <div class="flex justify-center mb-6">
+                    <div class="flex space-x-2">
+                        <button onclick="showDemoStep(1)" class="demo-step-btn w-3 h-3 rounded-full bg-green-600" data-step="1"></button>
+                        <button onclick="showDemoStep(2)" class="demo-step-btn w-3 h-3 rounded-full bg-gray-300" data-step="2"></button>
+                        <button onclick="showDemoStep(3)" class="demo-step-btn w-3 h-3 rounded-full bg-gray-300" data-step="3"></button>
+                        <button onclick="showDemoStep(4)" class="demo-step-btn w-3 h-3 rounded-full bg-gray-300" data-step="4"></button>
+                        <button onclick="showDemoStep(5)" class="demo-step-btn w-3 h-3 rounded-full bg-gray-300" data-step="5"></button>
+                    </div>
+                </div>
+
+                <!-- Step 1: Track Activities -->
+                <div id="demoStep1" class="demo-step">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">📊 Step 1: Track Your Activities</h3>
+                            <p class="text-gray-600 mb-4">
+                                Easily log your daily activities like transportation, energy use, and food choices. Our AI automatically calculates the carbon impact.
+                            </p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> Smart activity detection</li>
+                                <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> Real-time CO₂ calculations</li>
+                                <li class="flex items-center"><span class="text-green-600 mr-2">✓</span> Easy one-tap logging</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-8 text-center">
+                            <div class="w-64 mx-auto bg-white rounded-lg shadow-lg p-4">
+                                <h4 class="font-bold mb-3">🚗 Add Activity</h4>
+                                <div class="space-y-3 text-left text-sm">
+                                    <div class="bg-blue-50 p-3 rounded">Transportation: 25km drive</div>
+                                    <div class="bg-green-50 p-3 rounded">Impact: 5.2kg CO₂</div>
+                                    <button class="w-full bg-green-600 text-white py-2 rounded">Save Activity</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Get AI Recommendations -->
+                <div id="demoStep2" class="demo-step hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">🤖 Step 2: Get Smart Recommendations</h3>
+                            <p class="text-gray-600 mb-4">
+                                Our AI analyzes your patterns and suggests personalized actions to reduce your carbon footprint based on your lifestyle.
+                            </p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span> Personalized suggestions</li>
+                                <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span> Impact predictions</li>
+                                <li class="flex items-center"><span class="text-blue-600 mr-2">✓</span> Achievable goals</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-8 text-center">
+                            <div class="w-64 mx-auto bg-white rounded-lg shadow-lg p-4">
+                                <h4 class="font-bold mb-3">💡 AI Recommendations</h4>
+                                <div class="space-y-3 text-left text-xs">
+                                    <div class="bg-yellow-50 p-2 rounded">🚲 Bike to work twice/week → Save 12kg CO₂</div>
+                                    <div class="bg-green-50 p-2 rounded">🌱 Try plant-based meals → Save 8kg CO₂</div>
+                                    <div class="bg-blue-50 p-2 rounded">💡 Use LED bulbs → Save 15kg CO₂</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Join Challenges -->
+                <div id="demoStep3" class="demo-step hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">🏆 Step 3: Join Community Challenges</h3>
+                            <p class="text-gray-600 mb-4">
+                                Participate in monthly challenges with thousands of other climate warriors. Compete, collaborate, and make a bigger impact together!
+                            </p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center"><span class="text-purple-600 mr-2">✓</span> Monthly team challenges</li>
+                                <li class="flex items-center"><span class="text-purple-600 mr-2">✓</span> Leaderboards & rankings</li>
+                                <li class="flex items-center"><span class="text-purple-600 mr-2">✓</span> Community support</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-8 text-center">
+                            <div class="w-64 mx-auto bg-white rounded-lg shadow-lg p-4">
+                                <h4 class="font-bold mb-3">🔥 Car-Free Week</h4>
+                                <div class="space-y-2 text-left text-xs">
+                                    <div class="flex justify-between">
+                                        <span>Your Progress:</span>
+                                        <span class="font-bold">5/7 days</span>
+                                    </div>
+                                    <div class="bg-green-200 h-2 rounded">
+                                        <div class="bg-green-600 h-2 rounded w-4/5"></div>
+                                    </div>
+                                    <div class="text-center text-green-600 font-bold">You're in 2nd place! 🥈</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Share & Connect -->
+                <div id="demoStep4" class="demo-step hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">📱 Step 4: Share Your Wins</h3>
+                            <p class="text-gray-600 mb-4">
+                                Post your climate achievements, follow friends, and inspire others. Like Instagram, but every post helps save the planet!
+                            </p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center"><span class="text-pink-600 mr-2">✓</span> Share achievement photos</li>
+                                <li class="flex items-center"><span class="text-pink-600 mr-2">✓</span> Follow climate leaders</li>
+                                <li class="flex items-center"><span class="text-pink-600 mr-2">✓</span> Get likes & encouragement</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-8 text-center">
+                            <div class="w-64 mx-auto bg-white rounded-lg shadow-lg p-4">
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                                            <span class="text-green-600 font-bold text-xs">Y</span>
+                                        </div>
+                                        <span class="font-bold text-sm">You</span>
+                                    </div>
+                                    <div class="h-24 bg-gradient-to-r from-green-200 to-blue-200 rounded flex items-center justify-center">
+                                        <span class="text-2xl">🚲✨</span>
+                                    </div>
+                                    <div class="text-left text-sm">
+                                        <p class="font-semibold">Biked to work all week! 🚴‍♀️</p>
+                                        <p class="text-gray-500 text-xs">Saved 25kg CO₂ • 47 likes • 12 comments</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Track Impact -->
+                <div id="demoStep5" class="demo-step hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">📈 Step 5: See Your Impact</h3>
+                            <p class="text-gray-600 mb-4">
+                                Watch your carbon footprint shrink over time. Get detailed analytics, earn badges, and see how you're helping save the planet!
+                            </p>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center"><span class="text-orange-600 mr-2">✓</span> Monthly impact reports</li>
+                                <li class="flex items-center"><span class="text-orange-600 mr-2">✓</span> Achievement badges</li>
+                                <li class="flex items-center"><span class="text-orange-600 mr-2">✓</span> Progress tracking</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-8 text-center">
+                            <div class="w-64 mx-auto bg-white rounded-lg shadow-lg p-4">
+                                <h4 class="font-bold mb-3">🌟 Your Impact</h4>
+                                <div class="space-y-3 text-sm">
+                                    <div class="bg-green-50 p-3 rounded">
+                                        <div class="font-bold text-green-600">156kg CO₂ Saved</div>
+                                        <div class="text-xs text-gray-500">This month</div>
+                                    </div>
+                                    <div class="flex justify-between text-xs">
+                                        <span>🏆 Eco Warrior</span>
+                                        <span>🚲 Bike Champion</span>
+                                        <span>🌱 Plant Hero</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="flex justify-between items-center mt-8 pt-6 border-t">
+                    <button onclick="prevDemoStep()" id="prevBtn" class="bg-gray-200 text-gray-600 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50" disabled>
+                        ← Previous
+                    </button>
+                    <span id="stepIndicator" class="text-gray-600">1 of 5</span>
+                    <button onclick="nextDemoStep()" id="nextBtn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Next →
+                    </button>
+                </div>
+
+                <!-- CTA at the end -->
+                <div id="demoComplete" class="text-center mt-6 hidden">
+                    <button onclick="hideDemoTour(); showAuthModal();" class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-lg hover:shadow-lg transition-all font-bold text-lg">
+                        Ready to Start Your Climate Journey! 🚀
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Auth Modal -->
@@ -288,7 +991,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                            <input type="number" id="userAge" min="13" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <input type="number" id="signupAge" min="13" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Household Size</label>
@@ -342,7 +1045,7 @@
     </div>
 
     <!-- Carbon Tracking Modal -->
-    <div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay hidden flex items-center justify-center z-50">
+    <div id="trackingModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay hidden items-center justify-center z-50">
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 animate-slide-up">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">Track Activity</h2>
@@ -395,6 +1098,108 @@
     </div>
 
     <script>
+        // Social Media Landing Page Animations and Live Updates
+        let liveStats = {
+            carbonSaved: 2500000,
+            activeUsers: 15234,
+            todayActions: 1847,
+            carFreeCount: 2847,
+            plantBasedCount: 1923,
+            zeroWasteCount: 1456
+        };
+
+        let recentAchievements = [
+            { user: "Sarah", action: "went car-free for a week", time: "2 min ago", co2: 45 },
+            { user: "Mike", action: "installed solar panels", time: "5 min ago", co2: 120 },
+            { user: "Emma", action: "started composting", time: "8 min ago", co2: 15 },
+            { user: "Alex", action: "biked to work", time: "12 min ago", co2: 8 }
+        ];
+
+        // Simulate live updates every 3 seconds
+        function updateLiveStats() {
+            // Update counters
+            liveStats.carbonSaved += Math.floor(Math.random() * 10);
+            liveStats.activeUsers += Math.floor(Math.random() * 3);
+            liveStats.todayActions += Math.floor(Math.random() * 5);
+            liveStats.carFreeCount += Math.floor(Math.random() * 8);
+            liveStats.plantBasedCount += Math.floor(Math.random() * 6);
+            liveStats.zeroWasteCount += Math.floor(Math.random() * 4);
+
+            // Update DOM elements if they exist
+            const elements = {
+                'todayActions': `${liveStats.todayActions} climate actions today!`,
+                'carbonSaved': `🌱 ${liveStats.carbonSaved.toLocaleString()} kg CO₂ saved by our community`,
+                'onlineUsers': `${liveStats.activeUsers.toLocaleString() } climate warriors online`,
+                'liveUserCount': liveStats.activeUsers.toLocaleString(),
+                'carFreeCount': `${liveStats.carFreeCount.toLocaleString()} people joined today`,
+                'plantBasedCount': `${liveStats.plantBasedCount.toLocaleString()} people joined today`,
+                'zeroWasteCount': `${liveStats.zeroWasteCount.toLocaleString()} people joined today`,
+                'joinedToday': liveStats.carFreeCount.toLocaleString(),
+                'activeUsersCount': liveStats.activeUsers.toLocaleString(),
+                'totalCO2': `${(liveStats.carbonSaved / 1000).toFixed(1)}M`
+            };
+
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+
+            // Rotate recent achievements
+            const names = ["John", "Lisa", "David", "Grace", "Zoe", "Ryan", "Maya"];
+            const actions = [
+                "saved energy at home", 
+                "chose public transport", 
+                "reduced food waste",
+                "went vegetarian today",
+                "bought local produce",
+                "used renewable energy",
+                "planted trees"
+            ];
+            
+            recentAchievements.unshift({
+                user: names[Math.floor(Math.random() * names.length)],
+                action: actions[Math.floor(Math.random() * actions.length)],
+                time: "just now",
+                co2: Math.floor(Math.random() * 30) + 5
+            });
+            recentAchievements = recentAchievements.slice(0, 4);
+
+            // Update achievements display
+            updateAchievementsDisplay();
+        }
+
+        // Update the live community feed
+        function updateAchievementsDisplay() {
+            const container = document.getElementById('recentAchievements');
+            if (container) {
+                const colors = ['green', 'blue', 'purple', 'orange', 'pink'];
+                container.innerHTML = recentAchievements.map((achievement, index) => `
+                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg fade-in">
+                        <div class="w-8 h-8 bg-${colors[index % colors.length]}-100 rounded-full flex items-center justify-center">
+                            <span class="text-${colors[index % colors.length]}-600 font-semibold text-sm">${achievement.user[0]}</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800">
+                                <span class="font-semibold">${achievement.user}</span> ${achievement.action}
+                            </p>
+                            <p class="text-xs text-gray-500">${achievement.time} • Saved ${achievement.co2}kg CO₂</p>
+                        </div>
+                        <div class="text-green-600">
+                            <span class="text-xs">🌱</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Start live updates when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLiveStats(); // Initial update
+            setInterval(updateLiveStats, 3000); // Update every 3 seconds
+        });
+
         // Application State
         let currentUser = null;
         let isLoginMode = true;
@@ -603,9 +1408,77 @@
         }
 
         function hideTrackingModal() {
-            document.getElementById('trackingModal').classList.add('hidden');
-            document.getElementById('trackingModal').classList.remove('flex');
+            const modal = document.getElementById('trackingModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
             document.getElementById('trackingForm').reset();
+            
+            // Reset all dynamic form elements
+            document.getElementById('subcategoryDiv').classList.add('hidden');
+            document.getElementById('amountDiv').classList.add('hidden');
+            document.getElementById('descriptionDiv').classList.add('hidden');
+            document.getElementById('emissionPreview').classList.add('hidden');
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        // Demo Tour Functions
+        let currentDemoStep = 1;
+        const totalDemoSteps = 5;
+
+        function showDemoTour() {
+            document.getElementById('demoTourModal').classList.remove('hidden');
+            document.getElementById('demoTourModal').classList.add('flex');
+            currentDemoStep = 1;
+            showDemoStep(1);
+        }
+
+        function hideDemoTour() {
+            document.getElementById('demoTourModal').classList.add('hidden');
+            document.getElementById('demoTourModal').classList.remove('flex');
+        }
+
+        function showDemoStep(step) {
+            // Hide all steps
+            for (let i = 1; i <= totalDemoSteps; i++) {
+                document.getElementById(`demoStep${i}`).classList.add('hidden');
+                document.querySelector(`[data-step="${i}"]`).classList.remove('bg-green-600');
+                document.querySelector(`[data-step="${i}"]`).classList.add('bg-gray-300');
+            }
+
+            // Show current step
+            document.getElementById(`demoStep${step}`).classList.remove('hidden');
+            document.querySelector(`[data-step="${step}"]`).classList.add('bg-green-600');
+            document.querySelector(`[data-step="${step}"]`).classList.remove('bg-gray-300');
+
+            currentDemoStep = step;
+            
+            // Update navigation
+            document.getElementById('prevBtn').disabled = step === 1;
+            document.getElementById('stepIndicator').textContent = `${step} of ${totalDemoSteps}`;
+            
+            if (step === totalDemoSteps) {
+                document.getElementById('nextBtn').textContent = 'Get Started! 🚀';
+                document.getElementById('demoComplete').classList.remove('hidden');
+            } else {
+                document.getElementById('nextBtn').textContent = 'Next →';
+                document.getElementById('demoComplete').classList.add('hidden');
+            }
+        }
+
+        function nextDemoStep() {
+            if (currentDemoStep < totalDemoSteps) {
+                showDemoStep(currentDemoStep + 1);
+            } else {
+                // Last step - show CTA
+                hideDemoTour();
+                showAuthModal();
+            }
+        }
+
+        function prevDemoStep() {
+            if (currentDemoStep > 1) {
+                showDemoStep(currentDemoStep - 1);
+            }
         }
 
         function toggleAuthMode() {
@@ -650,6 +1523,21 @@
             errorDiv.classList.remove('hidden');
         }
 
+        function showSuccess(message) {
+            // Create a temporary success notification
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md shadow-lg z-50';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+
         // Simple hash function - in real app, use proper bcrypt
         function hashPassword(password) {
             let hash = 0;
@@ -659,6 +1547,43 @@
                 hash = hash & hash; // Convert to 32-bit integer
             }
             return hash.toString();
+        }
+
+        // Tab Navigation Functions
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabs = ['overview', 'social', 'challenges', 'friends', 'achievements'];
+            tabs.forEach(tab => {
+                const tabContent = document.getElementById(`${tab}-tab`);
+                const tabButton = document.getElementById(`tab-${tab}`);
+                
+                if (tabContent) {
+                    tabContent.classList.add('hidden');
+                }
+                
+                if (tabButton) {
+                    tabButton.classList.remove('border-green-500', 'text-green-600');
+                    tabButton.classList.add('border-transparent', 'text-gray-500');
+                }
+            });
+            
+            // Show selected tab content
+            const activeTabContent = document.getElementById(`${tabName}-tab`);
+            const activeTabButton = document.getElementById(`tab-${tabName}`);
+            
+            if (activeTabContent) {
+                activeTabContent.classList.remove('hidden');
+            }
+            
+            if (activeTabButton) {
+                activeTabButton.classList.remove('border-transparent', 'text-gray-500');
+                activeTabButton.classList.add('border-green-500', 'text-green-600');
+            }
+            
+            // Initialize social feed when switching to social tab
+            if (tabName === 'social') {
+                updateSocialFeed();
+            }
         }
 
         // Simple User Database (in real app, this would be backend database)
@@ -732,7 +1657,10 @@
                 return false;
             }
             
-            if (!age || age < 13 || age > 100) {
+            console.log('Age input value:', age, 'Type:', typeof age, 'Length:', age ? age.length : 'N/A');
+            const ageNum = parseInt(age);
+            console.log('Parsed age:', ageNum, 'IsNaN:', isNaN(ageNum));
+            if (!age || isNaN(ageNum) || ageNum < 13 || ageNum > 100) {
                 showError('Please enter a valid age (13-100)');
                 return false;
             }
@@ -756,7 +1684,7 @@
                 password: hashPassword(password),
                 full_name: fullName,
                 username: username,
-                age: parseInt(age),
+                age: ageNum,
                 household_size: parseInt(householdSize),
                 location_type: locationType,
                 created_at: new Date().toISOString()
@@ -894,6 +1822,7 @@
             populateAchievements();
             updateStats();
             updateProgressMotivation(); // Learning from failed apps
+            updateSocialFeed(); // Initialize social feed with data
         }
 
         function updateProgressMotivation() {
@@ -925,7 +1854,7 @@
                 return;
             }
             
-            displayActivities.forEach(activity => {
+            displayActivities.forEach((activity, index) => {
                 const activityDiv = document.createElement('div');
                 activityDiv.className = `flex justify-between items-center ${activity.isDemo ? 'opacity-60' : ''}`;
                 activityDiv.innerHTML = `
@@ -935,7 +1864,10 @@
                         </p>
                         <p class="text-sm text-gray-500">${activity.date}</p>
                     </div>
-                    <span class="text-lg font-semibold text-red-600">${activity.emissions} kg CO₂</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg font-semibold text-red-600">${activity.emissions} kg CO₂</span>
+                        ${!activity.isDemo ? `<button onclick="deleteActivity(${index})" class="text-red-500 hover:text-red-700 text-sm ml-2" title="Delete activity">🗑️</button>` : ''}
+                    </div>
                 `;
                 container.appendChild(activityDiv);
             });
@@ -1170,6 +2102,187 @@
             return factor * amount;
         }
 
+        // Social Feed Functions
+        let socialFeedData = [
+            {
+                id: 1,
+                user: "Sarah Martinez",
+                userInitial: "S",
+                userColor: "green",
+                time: "2 hours ago",
+                text: "Just completed my first car-free week! 🚲✨ Biked to work every day and saved 45kg of CO₂. Feeling amazing and my legs are getting stronger! Who's joining the challenge? #CarFreeWeek #ClimateAction",
+                achievement: {
+                    icon: "🚲",
+                    title: "Car-Free Week Complete!",
+                    co2: "45kg CO₂ Saved"
+                },
+                likes: 47,
+                comments: 12,
+                shares: 8
+            },
+            {
+                id: 2,
+                user: "Mike Chen",
+                userInitial: "M",
+                userColor: "blue",
+                time: "4 hours ago",
+                text: "Solar panels are FINALLY installed! ☀️⚡ The whole process took 3 months but seeing that first day of clean energy generation is incredible. Already generating 120kg CO₂ savings this week!",
+                achievement: {
+                    icon: "☀️",
+                    title: "Solar Installation Complete!",
+                    co2: "120kg CO₂ Saved This Week"
+                },
+                likes: 89,
+                comments: 23,
+                shares: 15
+            }
+        ];
+
+        function addToSocialFeed(activity) {
+            const userName = currentUser?.name || "You";
+            const userInitial = userName.charAt(0).toUpperCase();
+            
+            // Generate activity description based on category
+            let activityText = "";
+            let achievementIcon = "🌱";
+            let achievementTitle = "Climate Action Complete!";
+            
+            switch (activity.category) {
+                case 'transportation':
+                    if (activity.subcategory === 'bike') {
+                        activityText = `Just biked ${activity.amount}km! 🚲 Clean transportation feels great and I'm getting exercise too. Every pedal counts! #BikeLife #ClimateAction`;
+                        achievementIcon = "🚲";
+                        achievementTitle = "Bike Transportation!";
+                    } else if (activity.subcategory === 'publictransport') {
+                        activityText = `Took public transport for ${activity.amount}km today! 🚌 Avoiding car emissions and supporting sustainable transit. #PublicTransport #ClimateAction`;
+                        achievementIcon = "🚌";
+                        achievementTitle = "Public Transport Choice!";
+                    } else {
+                        activityText = `Tracked my transportation impact: ${activity.amount}km. Working to reduce my carbon footprint one trip at a time! #ClimateAware`;
+                        achievementIcon = "🚗";
+                        achievementTitle = "Transportation Tracked!";
+                    }
+                    break;
+                case 'energy':
+                    activityText = `Monitored my energy usage: ${activity.amount}kWh. Tracking usage is the first step to reducing my home's carbon footprint! #EnergyEfficiency #ClimateAction`;
+                    achievementIcon = "⚡";
+                    achievementTitle = "Energy Monitoring!";
+                    break;
+                case 'food':
+                    if (activity.subcategory === 'vegetarian') {
+                        activityText = `Enjoyed a delicious plant-based meal! 🌱 ${activity.amount}kg of vegetarian food = lower carbon impact. Small choices, big difference! #PlantBased #ClimateAction`;
+                        achievementIcon = "🌱";
+                        achievementTitle = "Plant-Based Choice!";
+                    } else {
+                        activityText = `Tracked my food choices: ${activity.amount}kg. Being mindful about what I eat and its climate impact! #ConsciousEating #ClimateAction`;
+                        achievementIcon = "🍽️";
+                        achievementTitle = "Food Impact Tracked!";
+                    }
+                    break;
+                case 'waste':
+                    activityText = `Reduced waste by ${activity.amount}kg through recycling and reusing! ♻️ Every bit of waste diverted helps our planet. #ZeroWaste #ClimateAction`;
+                    achievementIcon = "♻️";
+                    achievementTitle = "Waste Reduction!";
+                    break;
+                default:
+                    activityText = `Completed a climate-friendly action: ${activity.type}. Every action counts towards a sustainable future! #ClimateAction`;
+            }
+
+            const newPost = {
+                id: Date.now(),
+                activityId: activity.id, // Link to the original activity
+                user: userName,
+                userInitial: userInitial,
+                userColor: "purple",
+                time: "just now",
+                text: activityText,
+                achievement: {
+                    icon: achievementIcon,
+                    title: achievementTitle,
+                    co2: `${activity.emissions}kg CO₂ Impact`
+                },
+                likes: 0,
+                comments: 0,
+                shares: 0
+            };
+
+            socialFeedData.unshift(newPost);
+            updateSocialFeed();
+        }
+
+        function updateSocialFeed() {
+            const container = document.getElementById('socialFeedPosts');
+            if (!container) return;
+
+            const colors = {
+                green: 'bg-green-200 text-green-600',
+                blue: 'bg-blue-200 text-blue-600',
+                purple: 'bg-purple-200 text-purple-600',
+                orange: 'bg-orange-200 text-orange-600',
+                pink: 'bg-pink-200 text-pink-600'
+            };
+
+            const gradients = {
+                green: 'from-green-100 to-blue-100',
+                blue: 'from-yellow-100 to-orange-100',
+                purple: 'from-purple-100 to-pink-100',
+                orange: 'from-orange-100 to-red-100',
+                pink: 'from-pink-100 to-purple-100'
+            };
+
+            container.innerHTML = socialFeedData.map(post => `
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 ${colors[post.userColor]} rounded-full flex items-center justify-center">
+                                <span class="font-bold">${post.userInitial}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${post.user}</h4>
+                                <p class="text-sm text-gray-500">${post.time}</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-800 mb-4">${post.text}</p>
+                        <div class="bg-gradient-to-r ${gradients[post.userColor]} rounded-lg p-4 mb-4">
+                            <div class="text-center">
+                                <div class="text-2xl">${post.achievement.icon}</div>
+                                <div class="text-sm font-semibold text-gray-700">${post.achievement.title}</div>
+                                <div class="text-xs text-gray-600">${post.achievement.co2}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <div class="flex space-x-4">
+                                <button class="flex items-center space-x-1 hover:text-green-600" onclick="likeSocialPost(${post.id})">
+                                    <span>❤️</span>
+                                    <span id="likes-${post.id}">${post.likes}</span>
+                                </button>
+                                <button class="flex items-center space-x-1 hover:text-blue-600">
+                                    <span>💬</span>
+                                    <span>${post.comments}</span>
+                                </button>
+                                <button class="flex items-center space-x-1 hover:text-purple-600">
+                                    <span>🔄</span>
+                                    <span>${post.shares}</span>
+                                </button>
+                            </div>
+                            <button class="hover:text-gray-700">🔖</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function likeSocialPost(postId) {
+            const post = socialFeedData.find(p => p.id === postId);
+            if (post) {
+                post.likes += 1;
+                const likesElement = document.getElementById(`likes-${postId}`);
+                if (likesElement) {
+                    likesElement.textContent = post.likes;
+                }
+            }
+        }
+
         function addActivity(category, subcategory, amount, description = '') {
             // Use the new structured calculation
             if (!activityConfig[category]?.subcategories[subcategory]) {
@@ -1209,6 +2322,37 @@
             
             // Check for achievements
             checkAchievements();
+            
+            // Add to social feed if it's a significant activity
+            if (newActivity.emissions > 1) { // Only post activities that save more than 1kg CO2
+                addToSocialFeed(newActivity);
+            }
+        }
+
+        function deleteActivity(index) {
+            if (confirm('Are you sure you want to delete this activity?')) {
+                const activityToDelete = activities[index];
+                
+                // Remove from activities array
+                activities.splice(index, 1);
+                
+                // Find and remove corresponding social media post
+                const socialPostIndex = socialFeedData.findIndex(post => 
+                    post.activityId === activityToDelete.id
+                );
+                if (socialPostIndex !== -1) {
+                    socialFeedData.splice(socialPostIndex, 1);
+                }
+                
+                // Update all displays
+                populateActivities();
+                updateStats();
+                populateRecommendations();
+                updateSocialFeed();
+                
+                // Show confirmation
+                showSuccess('Activity deleted successfully!');
+            }
         }
 
         function showImpactFeedback(activity) {
@@ -1313,7 +2457,7 @@
             } else {
                 const fullName = document.getElementById('fullName').value;
                 const username = document.getElementById('username').value;
-                const age = document.getElementById('userAge').value;
+                const age = document.getElementById('signupAge').value;
                 const householdSize = document.getElementById('householdSize').value;
                 const locationType = document.getElementById('locationType').value;
                 register(email, password, fullName, username, age, householdSize, locationType);
@@ -1351,6 +2495,23 @@
             if (e.target.classList.contains('modal-overlay')) {
                 hideAuthModal();
                 hideTrackingModal();
+                hideDemoTour();
+            }
+        });
+
+        // Keyboard navigation for demo tour
+        document.addEventListener('keydown', function(e) {
+            if (!document.getElementById('demoTourModal').classList.contains('hidden')) {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextDemoStep();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevDemoStep();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideDemoTour();
+                }
             }
         });
     </script>

@@ -181,4 +181,4 @@ class IoTReading(Base):
     unit = Column(String, nullable=False)
     carbon_equivalent = Column(Float)  # Calculated CO2 equivalent
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
-    metadata = Column(Text)  # JSON for additional data
+    reading_metadata = Column(Text)  # JSON for additional data

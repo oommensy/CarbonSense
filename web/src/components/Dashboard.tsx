@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import SocialFeed from './SocialFeed'
 
 interface DashboardData {
   totalEmissions: number
@@ -199,6 +200,15 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Climate Community Feed */}
+        <div className="mt-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">🌍 Climate Community</h2>
+            <p className="text-gray-600">Connect with fellow climate warriors, share achievements, and get inspired</p>
+          </div>
+          <SocialFeed />
         </div>
       </main>
     </div>

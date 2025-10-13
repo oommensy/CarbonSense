@@ -15,6 +15,9 @@ import CarbonTrackerScreen from './src/screens/CarbonTrackerScreen';
 import ChallengesScreen from './src/screens/ChallengesScreen';
 import ImpactScreen from './src/screens/ImpactScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SocialFeedScreen from './src/screens/SocialFeedScreen';
+import FriendsScreen from './src/screens/FriendsScreen';
+import NotificationsScreen from './src/screens/NotificationsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -31,12 +34,14 @@ export default function App() {
 
                   if (route.name === 'Dashboard') {
                     iconName = focused ? 'home' : 'home-outline';
+                  } else if (route.name === 'Feed') {
+                    iconName = focused ? 'earth' : 'earth-outline';
                   } else if (route.name === 'Tracker') {
                     iconName = focused ? 'leaf' : 'leaf-outline';
                   } else if (route.name === 'Challenges') {
                     iconName = focused ? 'trophy' : 'trophy-outline';
-                  } else if (route.name === 'Impact') {
-                    iconName = focused ? 'bar-chart' : 'bar-chart-outline';
+                  } else if (route.name === 'Network') {
+                    iconName = focused ? 'people' : 'people-outline';
                   } else if (route.name === 'Profile') {
                     iconName = focused ? 'person' : 'person-outline';
                   } else {
@@ -63,6 +68,11 @@ export default function App() {
                 options={{ title: 'Home' }}
               />
               <Tab.Screen 
+                name="Feed" 
+                component={SocialFeedScreen}
+                options={{ title: 'Climate Feed' }}
+              />
+              <Tab.Screen 
                 name="Tracker" 
                 component={CarbonTrackerScreen}
                 options={{ title: 'Track' }}
@@ -73,9 +83,9 @@ export default function App() {
                 options={{ title: 'Challenges' }}
               />
               <Tab.Screen 
-                name="Impact" 
-                component={ImpactScreen}
-                options={{ title: 'Impact' }}
+                name="Network" 
+                component={FriendsScreen}
+                options={{ title: 'Network' }}
               />
               <Tab.Screen 
                 name="Profile" 
