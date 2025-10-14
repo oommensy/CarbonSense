@@ -158,6 +158,7 @@ This is currently a personal project in MVP validation phase. Once we validate t
 Interested in climate tech collaboration, partnership opportunities, or just want to discuss the social approach to sustainability?
 
 **Demo the app**: Run locally
+
 **Business inquiries**: steffy.a.oommen@gmail.com
 
 ---
