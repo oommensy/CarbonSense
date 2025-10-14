@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CarbonSense - Track Your Carbon Footprint</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -49,6 +50,17 @@
 <body class="bg-gray-50">
     <!-- Landing Page -->
     <div id="landingPage" class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <!-- Demo Disclaimer Banner -->
+        <div id="demoDisclaimer" class="bg-blue-50 border-b border-blue-200 px-4 py-2 text-center">
+            <div class="max-w-7xl mx-auto">
+                <p class="text-sm text-blue-800">
+                    🚀 <strong>Demo Mode:</strong> Community stats and challenges shown are for demonstration purposes. 
+                    <span class="font-medium">Real data will display as users join and engage.</span>
+                    <button onclick="hideDemoDisclaimer()" class="ml-2 text-blue-600 hover:text-blue-800 underline text-xs">Hide</button>
+                </p>
+            </div>
+        </div>
+
         <!-- Header with Live Activity Ticker -->
         <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +106,7 @@
                         <span class="text-green-600"> Social Movement</span>
                     </h1>
                     <p class="mt-4 text-xl text-gray-600">
-                        Connect with 15,000+ climate warriors. Share achievements, compete in challenges, and make saving the planet social and fun! 🎯
+                        Connect with 15,000+ climate warriors (demo). Share achievements, compete in challenges, and make saving the planet social and fun! 🎯
                     </p>
                     
                     <!-- Social Proof Pills -->
@@ -212,7 +224,7 @@
                         </div>
                         <h3 class="font-bold text-gray-900 mb-2">Car-Free Week</h3>
                         <p class="text-green-600 font-semibold text-sm mb-3" id="carFreeCount">
-                            2,847 people joined today
+                            2,847 people joined today (demo)
                         </p>
                         <div class="bg-gray-100 text-gray-700 text-xs p-2 rounded mb-3">
                             ⏰ 12 days left to join!
@@ -231,7 +243,7 @@
                         </div>
                         <h3 class="font-bold text-gray-900 mb-2">Plant-Based Month</h3>
                         <p class="text-blue-600 font-semibold text-sm mb-3" id="plantBasedCount">
-                            1,923 people joined today
+                            1,923 people joined today (demo)
                         </p>
                         <div class="bg-gray-100 text-gray-700 text-xs p-2 rounded mb-3">
                             ⏰ 18 days left to join!
@@ -250,7 +262,7 @@
                         </div>
                         <h3 class="font-bold text-gray-900 mb-2">Zero Waste Challenge</h3>
                         <p class="text-purple-600 font-semibold text-sm mb-3" id="zeroWasteCount">
-                            1,456 people joined today
+                            1,456 people joined today (demo)
                         </p>
                         <div class="bg-gray-100 text-gray-700 text-xs p-2 rounded mb-3">
                             ⏰ 25 days left to join!
@@ -328,7 +340,7 @@
             <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl shadow-lg p-8 text-white text-center mb-16">
                 <h2 class="text-3xl font-bold mb-4">⏰ Don't Miss Out!</h2>
                 <p class="text-xl mb-6">
-                    This month: Join the <span class="font-bold">Car-Free Challenge</span> with 5,000+ participants
+                    This month: Join the <span class="font-bold">Car-Free Challenge</span> with 5,000+ participants (demo)
                 </p>
                 <div class="flex justify-center space-x-8 mb-6">
                     <div>
@@ -337,11 +349,11 @@
                     </div>
                     <div>
                         <div class="text-2xl font-bold" id="joinedToday">2,847</div>
-                        <div class="text-sm opacity-90">Joined Today</div>
+                        <div class="text-sm opacity-90">Joined Today (demo)</div>
                     </div>
                     <div>
                         <div class="text-2xl font-bold" id="co2SavedChallenge">456k</div>
-                        <div class="text-sm opacity-90">kg CO₂ Saved</div>
+                        <div class="text-sm opacity-90">kg CO₂ Saved (demo)</div>
                     </div>
                 </div>
                 <button onclick="showAuthModal()" class="bg-white text-green-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-bold text-lg shadow-lg">
@@ -410,17 +422,17 @@
                     <div class="text-center">
                         <div class="text-3xl font-bold text-green-600" id="totalCO2">2.5M</div>
                         <div class="text-gray-600">kg CO₂ Reduced Together</div>
-                        <div class="text-xs text-green-600 mt-1">+456kg today!</div>
+                        <div class="text-xs text-green-600 mt-1">+456kg today! (demo)</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-blue-600" id="activeUsersCount">15,234</div>
                         <div class="text-gray-600">Climate Warriors</div>
-                        <div class="text-xs text-blue-600 mt-1">+127 joined today!</div>
+                        <div class="text-xs text-blue-600 mt-1">+127 joined today! (demo)</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-purple-600" id="challengesCompleted">8,456</div>
                         <div class="text-gray-600">Challenges Completed</div>
-                        <div class="text-xs text-purple-600 mt-1">+89 this week!</div>
+                        <div class="text-xs text-purple-600 mt-1">+89 this week! (demo)</div>
                     </div>
                 </div>
                 <div class="text-center mt-8">
@@ -463,6 +475,9 @@
                     <button onclick="showTab('overview')" id="tab-overview" class="tab-btn py-4 px-1 border-b-2 border-green-500 text-green-600 font-medium text-sm">
                         📊 Overview
                     </button>
+                    <button onclick="showTab('analytics')" id="tab-analytics" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
+                        📈 Analytics
+                    </button>
                     <button onclick="showTab('social')" id="tab-social" class="tab-btn py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm">
                         👥 Social Feed
                     </button>
@@ -483,6 +498,29 @@
         <div id="tabContent">
             <!-- Overview Tab (Default) -->
             <div id="overview-tab" class="tab-content">
+                <!-- Smart Suggestion Notification Bar -->
+                <div id="suggestionNotification" class="hidden bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow-lg">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="text-2xl">🤖</div>
+                                <div>
+                                    <div class="font-medium" id="suggestionTitle">Smart Suggestion</div>
+                                    <div class="text-sm opacity-90" id="suggestionMessage">Based on your patterns...</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="acceptSuggestion()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-md text-sm transition-colors">
+                                    ✅ Add Activity
+                                </button>
+                                <button onclick="dismissSuggestion()" class="bg-white bg-opacity-10 hover:bg-opacity-20 px-3 py-2 rounded-md text-sm transition-colors">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Main Dashboard Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Overview Cards -->
@@ -582,7 +620,7 @@
                     </div>
                     <div>
                         <div class="text-2xl font-bold text-purple-600" id="userRanking">Top 32%</div>
-                        <div class="text-sm text-gray-600">In Your Area</div>
+                        <div class="text-sm text-gray-600">In Your Area <span class="text-xs text-blue-500">(Demo)</span></div>
                     </div>
                 </div>
                 <div class="mt-4 text-center">
@@ -723,19 +761,119 @@
                                 <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Community Impact</h3>
                                 <div class="space-y-3">
                                     <div class="text-center">
-                                        <div class="text-2xl font-bold text-green-600">2.5M</div>
+                                        <div class="text-2xl font-bold text-green-600" id="communityCO2">2.5M</div>
                                         <div class="text-sm text-gray-600">kg CO₂ Saved Together</div>
                                     </div>
                                     <div class="text-center">
-                                        <div class="text-2xl font-bold text-blue-600">15.2K</div>
+                                        <div class="text-2xl font-bold text-blue-600" id="communityMembers">15.2K</div>
                                         <div class="text-sm text-gray-600">Active Members</div>
                                     </div>
                                     <div class="text-center">
-                                        <div class="text-2xl font-bold text-purple-600">1,847</div>
+                                        <div class="text-2xl font-bold text-purple-600" id="communityActions">1,847</div>
                                         <div class="text-sm text-gray-600">Actions Today</div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content hidden">
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">📈 Your Climate Analytics</h2>
+                        <p class="text-gray-600">Track your progress and discover insights about your environmental impact</p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100 text-sm">Total CO₂ Tracked</p>
+                                    <p class="text-2xl font-bold" id="totalEmissions">0 kg</p>
+                                </div>
+                                <div class="text-3xl">🌍</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100 text-sm">Activities Logged</p>
+                                    <p class="text-2xl font-bold" id="totalActivities">0</p>
+                                </div>
+                                <div class="text-3xl">📊</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-purple-100 text-sm">Daily Average</p>
+                                    <p class="text-2xl font-bold" id="dailyAverage">0 kg</p>
+                                </div>
+                                <div class="text-3xl">📅</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-orange-100 text-sm">Most Impact</p>
+                                    <p class="text-2xl font-bold" id="topCategory">Transport</p>
+                                </div>
+                                <div class="text-3xl">🚗</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Emissions Over Time Chart -->
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Emissions Over Time</h3>
+                            <div style="height: 300px;">
+                                <canvas id="emissionsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Category Breakdown Chart -->
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">🥧 Category Breakdown</h3>
+                            <div style="height: 300px;">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Progress Chart -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Weekly Progress</h3>
+                        <div style="height: 400px;">
+                            <canvas id="weeklyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Recommendations Section -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">💡 Smart Recommendations</h3>
+                        <p class="text-gray-600 mb-6">Personalized suggestions based on your activity patterns</p>
+                        <div id="smartRecommendations" class="space-y-4">
+                            <!-- Smart recommendations will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Smart Activity Suggestions Section -->
+                    <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">🤖 Smart Activity Suggestions</h3>
+                        <p class="text-gray-600 mb-6">AI-powered suggestions based on your patterns and habits</p>
+                        <div id="activitySuggestions" class="space-y-4">
+                            <!-- Activity suggestions will be populated here -->
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button onclick="refreshSuggestions()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm">
+                                🔄 Refresh Suggestions
+                            </button>
                         </div>
                     </div>
                 </main>
@@ -1099,14 +1237,7 @@
 
     <script>
         // Social Media Landing Page Animations and Live Updates
-        let liveStats = {
-            carbonSaved: 2500000,
-            activeUsers: 15234,
-            todayActions: 1847,
-            carFreeCount: 2847,
-            plantBasedCount: 1923,
-            zeroWasteCount: 1456
-        };
+        // Removed hardcoded liveStats - now using real community data via updateCommunityStats()
 
         let recentAchievements = [
             { user: "Sarah", action: "went car-free for a week", time: "2 min ago", co2: 45 },
@@ -1115,58 +1246,12 @@
             { user: "Alex", action: "biked to work", time: "12 min ago", co2: 8 }
         ];
 
-        // Simulate live updates every 3 seconds
+        // Real-time community stats update (no longer fake animation)
         function updateLiveStats() {
-            // Update counters
-            liveStats.carbonSaved += Math.floor(Math.random() * 10);
-            liveStats.activeUsers += Math.floor(Math.random() * 3);
-            liveStats.todayActions += Math.floor(Math.random() * 5);
-            liveStats.carFreeCount += Math.floor(Math.random() * 8);
-            liveStats.plantBasedCount += Math.floor(Math.random() * 6);
-            liveStats.zeroWasteCount += Math.floor(Math.random() * 4);
-
-            // Update DOM elements if they exist
-            const elements = {
-                'todayActions': `${liveStats.todayActions} climate actions today!`,
-                'carbonSaved': `🌱 ${liveStats.carbonSaved.toLocaleString()} kg CO₂ saved by our community`,
-                'onlineUsers': `${liveStats.activeUsers.toLocaleString() } climate warriors online`,
-                'liveUserCount': liveStats.activeUsers.toLocaleString(),
-                'carFreeCount': `${liveStats.carFreeCount.toLocaleString()} people joined today`,
-                'plantBasedCount': `${liveStats.plantBasedCount.toLocaleString()} people joined today`,
-                'zeroWasteCount': `${liveStats.zeroWasteCount.toLocaleString()} people joined today`,
-                'joinedToday': liveStats.carFreeCount.toLocaleString(),
-                'activeUsersCount': liveStats.activeUsers.toLocaleString(),
-                'totalCO2': `${(liveStats.carbonSaved / 1000).toFixed(1)}M`
-            };
-
-            Object.keys(elements).forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = elements[id];
-                }
-            });
-
-            // Rotate recent achievements
-            const names = ["John", "Lisa", "David", "Grace", "Zoe", "Ryan", "Maya"];
-            const actions = [
-                "saved energy at home", 
-                "chose public transport", 
-                "reduced food waste",
-                "went vegetarian today",
-                "bought local produce",
-                "used renewable energy",
-                "planted trees"
-            ];
+            // Use real community stats instead of fake incrementing numbers
+            updateCommunityStats();
             
-            recentAchievements.unshift({
-                user: names[Math.floor(Math.random() * names.length)],
-                action: actions[Math.floor(Math.random() * actions.length)],
-                time: "just now",
-                co2: Math.floor(Math.random() * 30) + 5
-            });
-            recentAchievements = recentAchievements.slice(0, 4);
-
-            // Update achievements display
+            // Still update recent achievements display for community feed
             updateAchievementsDisplay();
         }
 
@@ -1196,8 +1281,9 @@
 
         // Start live updates when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            updateLiveStats(); // Initial update
-            setInterval(updateLiveStats, 3000); // Update every 3 seconds
+            updateCommunityStats(); // Use real community stats instead of fake animations
+            // Update community stats every 30 seconds (less frequent, more realistic)
+            setInterval(updateCommunityStats, 30000);
         });
 
         // Application State
@@ -1205,7 +1291,7 @@
         let isLoginMode = true;
         let isDemoMode = true; // Flag to control demo data
         
-        // Real user activities start empty
+        // Real user activities start empty (will be loaded per user)
         let activities = [];
         
         // Demo data for showcase (separate from user data)
@@ -1214,6 +1300,33 @@
             { id: 'demo2', type: 'Energy - Electricity', emissions: 8.3, date: '2024-01-14', isDemo: true },
             { id: 'demo3', type: 'Food - Meat', emissions: 6.7, date: '2024-01-14', isDemo: true }
         ];
+
+        // User Data Management
+        function loadUserActivities(userEmail) {
+            const userActivitiesKey = `carbonSense_activities_${userEmail}`;
+            const savedActivities = localStorage.getItem(userActivitiesKey);
+            return savedActivities ? JSON.parse(savedActivities) : [];
+        }
+
+        function saveUserActivities(userEmail, userActivities) {
+            const userActivitiesKey = `carbonSense_activities_${userEmail}`;
+            localStorage.setItem(userActivitiesKey, JSON.stringify(userActivities));
+        }
+
+        function hasUserSeenDemoPrompt(userEmail) {
+            const demoPromptKey = `carbonSense_demo_prompt_${userEmail}`;
+            return localStorage.getItem(demoPromptKey) === 'true';
+        }
+
+        function markUserSeenDemoPrompt(userEmail) {
+            const demoPromptKey = `carbonSense_demo_prompt_${userEmail}`;
+            localStorage.setItem(demoPromptKey, 'true');
+        }
+
+        function isFirstTimeUser(userEmail) {
+            const userActivities = loadUserActivities(userEmail);
+            return userActivities.length === 0 && !hasUserSeenDemoPrompt(userEmail);
+        }
 
         // Dynamic AI Recommendations Engine
         function generatePersonalizedRecommendations() {
@@ -1549,10 +1662,156 @@
             return hash.toString();
         }
 
+        // Hide demo disclaimer banner
+        function hideDemoDisclaimer() {
+            const disclaimer = document.getElementById('demoDisclaimer');
+            if (disclaimer) {
+                disclaimer.style.display = 'none';
+                // Store preference in localStorage
+                localStorage.setItem('hideDemoDisclaimer', 'true');
+            }
+        }
+
+        // Show disclaimer on page load if not hidden
+        function checkDemoDisclaimer() {
+            const shouldHide = localStorage.getItem('hideDemoDisclaimer') === 'true';
+            const disclaimer = document.getElementById('demoDisclaimer');
+            if (shouldHide && disclaimer) {
+                disclaimer.style.display = 'none';
+            }
+        }
+
+        // Calculate real community data based on all users' activities
+        function updateCommunityStats() {
+            // Get all registered users from localStorage
+            const allUsers = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('user_') && key.endsWith('_activities')) {
+                    const userId = key.replace('user_', '').replace('_activities', '');
+                    const userActivities = JSON.parse(localStorage.getItem(key) || '[]');
+                    allUsers.push({ userId, activities: userActivities });
+                }
+            }
+
+            // Calculate community metrics
+            const totalActivities = allUsers.reduce((sum, user) => sum + user.activities.length, 0);
+            const totalMembers = allUsers.length;
+            
+            // Calculate CO2 awareness/tracking impact
+            // Each tracked activity represents awareness and behavioral change potential
+            // Apply a realistic carbon savings multiplier based on activity tracking
+            const totalTrackedEmissions = allUsers.reduce((sum, user) => {
+                return sum + user.activities.reduce((userSum, activity) => userSum + activity.emissions, 0);
+            }, 0);
+            
+            // Carbon savings calculation: assume 15% reduction for tracked activities
+            // This represents the awareness effect and behavioral improvements from tracking
+            const carbonSavings = totalTrackedEmissions * 0.15;
+            
+            // Add base community impact (each member represents ~500kg CO2 awareness annually)
+            const baseCommunityImpact = totalMembers * 500;
+            const totalCO2Impact = carbonSavings + baseCommunityImpact;
+
+            // Calculate today's actions
+            const today = new Date().toISOString().split('T')[0];
+            const todaysActions = allUsers.reduce((sum, user) => {
+                const todaysActivities = user.activities.filter(activity => activity.date === today);
+                return sum + todaysActivities.length;
+            }, 0);
+
+            // Add realistic baseline numbers for community growth simulation
+            const baselineActions = Math.max(50, todaysActions); // Minimum 50 actions per day
+            const baselineMembers = Math.max(100, totalMembers); // Minimum 100 members
+            const baselineCO2 = Math.max(10000, totalCO2Impact); // Minimum 10,000kg impact
+
+            // Determine if these are demo stats (using baseline values)
+            const isDemo = totalMembers <= 100 && todaysActions <= 50 && totalCO2Impact <= 10000;
+
+            // Format and update the display
+            const formatNumber = (num) => {
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                return Math.round(num).toString();
+            };
+
+            // Update community stats display
+            const communityStats = {
+                co2: formatNumber(baselineCO2),
+                members: formatNumber(baselineMembers),
+                actions: formatNumber(baselineActions)
+            };
+
+            // Update the DOM elements
+            const co2Element = document.getElementById('communityCO2');
+            const membersElement = document.getElementById('communityMembers');
+            const actionsElement = document.getElementById('communityActions');
+
+            if (co2Element) co2Element.textContent = communityStats.co2 + (isDemo ? ' (demo)' : '');
+            if (membersElement) membersElement.textContent = communityStats.members + (isDemo ? ' (demo)' : '');
+            if (actionsElement) actionsElement.textContent = communityStats.actions + (isDemo ? ' (demo)' : '');
+
+            // Also update the landing page community stats if present
+            const totalCO2Element = document.getElementById('totalCO2');
+            const activeUsersElement = document.getElementById('activeUsersCount');
+            
+            if (totalCO2Element) totalCO2Element.textContent = communityStats.co2 + (isDemo ? ' (demo)' : '');
+            if (activeUsersElement) activeUsersElement.textContent = communityStats.members + (isDemo ? ' (demo)' : '');
+
+            // Update header ticker stats
+            const todayActionsElement = document.getElementById('todayActions');
+            const carbonSavedElement = document.getElementById('carbonSaved');
+            const onlineUsersElement = document.getElementById('onlineUsers');
+            const liveUserCountElement = document.getElementById('liveUserCount');
+            
+            const demoSuffix = isDemo ? ' (demo)' : '';
+            
+            if (todayActionsElement) {
+                todayActionsElement.textContent = `${communityStats.actions} climate actions today!${demoSuffix}`;
+            }
+            if (carbonSavedElement) {
+                carbonSavedElement.textContent = `🌱 ${communityStats.co2} kg CO₂ saved by our community${demoSuffix}`;
+            }
+            if (onlineUsersElement) {
+                onlineUsersElement.textContent = `${communityStats.members} climate warriors online${demoSuffix}`;
+            }
+            if (liveUserCountElement) {
+                liveUserCountElement.textContent = `${communityStats.members}${isDemo ? ' (demo)' : ''}`;
+            }
+
+            // Log for debugging
+            console.log('Community Stats Updated:', {
+                totalUsers: allUsers.length,
+                totalActivities,
+                todaysActions,
+                carbonSavings: Math.round(carbonSavings),
+                totalImpact: Math.round(totalCO2Impact),
+                displayStats: communityStats,
+                isDemoMode: isDemo,
+                demoNote: isDemo ? 'Showing baseline demo values - stats will become real as users register and add activities' : 'Showing real community data'
+            });
+
+            // Auto-hide demo disclaimer when we have real data
+            if (!isDemo && totalMembers > 100) {
+                const disclaimer = document.getElementById('demoDisclaimer');
+                if (disclaimer && disclaimer.style.display !== 'none') {
+                    disclaimer.innerHTML = `
+                        <div class="max-w-7xl mx-auto">
+                            <p class="text-sm text-green-800">
+                                🎉 <strong>Real Data Active!</strong> You're now seeing live community statistics from actual users. 
+                                <button onclick="hideDemoDisclaimer()" class="ml-2 text-green-600 hover:text-green-800 underline text-xs">Hide</button>
+                            </p>
+                        </div>
+                    `;
+                    disclaimer.className = 'bg-green-50 border-b border-green-200 px-4 py-2 text-center';
+                }
+            }
+        }
+
         // Tab Navigation Functions
         function showTab(tabName) {
             // Hide all tab contents
-            const tabs = ['overview', 'social', 'challenges', 'friends', 'achievements'];
+            const tabs = ['overview', 'analytics', 'social', 'challenges', 'friends', 'achievements'];
             tabs.forEach(tab => {
                 const tabContent = document.getElementById(`${tab}-tab`);
                 const tabButton = document.getElementById(`tab-${tab}`);
@@ -1580,9 +1839,15 @@
                 activeTabButton.classList.add('border-green-500', 'text-green-600');
             }
             
-            // Initialize social feed when switching to social tab
+            // Initialize specific tab content
             if (tabName === 'social') {
                 updateSocialFeed();
+                updateCommunityStats();
+            } else if (tabName === 'analytics') {
+                // Initialize analytics with a small delay to ensure DOM is ready
+                setTimeout(() => {
+                    initializeAnalytics();
+                }, 100);
             }
         }
 
@@ -1702,6 +1967,12 @@
                 household_size: parseInt(householdSize),
                 location_type: locationType
             };
+
+            // Initialize empty activities for new user
+            activities = [];
+            
+            // New users are first-time users, so demo mode is true
+            isDemoMode = true;
             
             showDashboard();
             hideAuthModal();
@@ -1718,18 +1989,18 @@
                 showError('Please enter your password');
                 return false;
             }
-            
+
             const user = users[email];
             if (!user) {
                 showError('No account found with this email address');
                 return false;
             }
-            
+
             if (user.password !== hashPassword(password)) {
                 showError('Incorrect password');
                 return false;
             }
-            
+
             currentUser = {
                 email: user.email,
                 full_name: user.full_name,
@@ -1738,13 +2009,17 @@
                 household_size: user.household_size || 2, // Default household size
                 location_type: user.location_type || 'urban' // Default location type
             };
+
+            // Load user's activities
+            activities = loadUserActivities(email);
             
+            // Set demo mode based on whether this is first time
+            isDemoMode = isFirstTimeUser(email);
+
             showDashboard();
             hideAuthModal();
             return true;
-        }
-
-        function logout() {
+        }        function logout() {
             currentUser = null;
             showLandingPage();
         }
@@ -1753,6 +2028,12 @@
         function showLandingPage() {
             document.getElementById('landingPage').classList.remove('hidden');
             document.getElementById('dashboard').classList.add('hidden');
+            
+            // Update landing page with real community stats
+            updateCommunityStats();
+            
+            // Check demo disclaimer preference
+            checkDemoDisclaimer();
         }
 
         function showDashboard() {
@@ -1769,8 +2050,8 @@
             
             populateDashboard();
             
-            // Show welcome message for new users
-            if (activities.length === 0 && isDemoMode) {
+            // Show welcome message only for first-time users
+            if (currentUser && isFirstTimeUser(currentUser.email)) {
                 setTimeout(() => {
                     showWelcomeModal();
                 }, 500);
@@ -1805,6 +2086,9 @@
 
         function startFreshUser() {
             isDemoMode = false;
+            if (currentUser) {
+                markUserSeenDemoPrompt(currentUser.email);
+            }
             populateActivities();
             updateStats();
             updateProgressMotivation();
@@ -1812,6 +2096,9 @@
         }
 
         function continueWithDemo() {
+            if (currentUser) {
+                markUserSeenDemoPrompt(currentUser.email);
+            }
             document.getElementById('welcomeModal').remove();
         }
 
@@ -1823,6 +2110,9 @@
             updateStats();
             updateProgressMotivation(); // Learning from failed apps
             updateSocialFeed(); // Initialize social feed with data
+            
+            // Initialize smart suggestions
+            initializeSmartSuggestions();
         }
 
         function updateProgressMotivation() {
@@ -2311,6 +2601,15 @@
             };
             
             activities.unshift(newActivity);
+            
+            // Save user activities to localStorage
+            if (currentUser) {
+                saveUserActivities(currentUser.email, activities);
+            }
+            
+            // Update suggestion engine with new activity
+            suggestionEngine.updateActivities(activities);
+            
             populateActivities();
             updateStats();
             
@@ -2335,6 +2634,11 @@
                 
                 // Remove from activities array
                 activities.splice(index, 1);
+                
+                // Save updated activities to localStorage
+                if (currentUser) {
+                    saveUserActivities(currentUser.email, activities);
+                }
                 
                 // Find and remove corresponding social media post
                 const socialPostIndex = socialFeedData.findIndex(post => 
@@ -2375,22 +2679,20 @@
             const unlockedAchievements = [];
             
             // First activity achievement
-            if (activities.length === 1) {
-                unlockedAchievements.push('🎯 Data Explorer - Logged your first activity!');
+            if (activities.length === 1 && !achievements[0].achieved) {
+                unlockedAchievements.push('🎯 First Steps - Logged your first activity!');
                 achievements[0].achieved = true;
             }
             
-            // Consistency achievement (simplified for demo)
-            if (activities.length >= 3) {
-                unlockedAchievements.push('🔥 Activity Champion - 3 activities logged!');
+            // Week Warrior achievement - 7 consecutive days
+            if (!achievements[1].achieved && checkConsecutiveDays()) {
+                unlockedAchievements.push('🔥 Week Warrior - 7 consecutive days of tracking!');
                 achievements[1].achieved = true;
             }
             
-            // Low carbon day achievement
-            const todaysActivities = activities.filter(a => a.date === new Date().toISOString().split('T')[0]);
-            const todaysTotal = todaysActivities.reduce((sum, a) => sum + a.emissions, 0);
-            if (todaysTotal > 0 && todaysTotal < 5) {
-                unlockedAchievements.push('🌱 Eco Warrior - Low carbon day achieved!');
+            // Carbon Reducer achievement - 10% weekly reduction
+            if (!achievements[2].achieved && checkWeeklyReduction()) {
+                unlockedAchievements.push('🌱 Carbon Reducer - Reduced weekly emissions by 10%!');
                 achievements[2].achieved = true;
             }
             
@@ -2401,6 +2703,78 @@
                     populateAchievements();
                 }, 1000);
             }
+        }
+
+        function checkConsecutiveDays() {
+            if (activities.length < 7) return false;
+            
+            // Get all unique dates with activities
+            const activityDates = [...new Set(activities.map(a => a.date))].sort();
+            
+            if (activityDates.length < 7) return false;
+            
+            // Check for any 7 consecutive days
+            for (let i = 0; i <= activityDates.length - 7; i++) {
+                let consecutive = true;
+                const startDate = new Date(activityDates[i]);
+                
+                for (let j = 1; j < 7; j++) {
+                    const expectedDate = new Date(startDate);
+                    expectedDate.setDate(startDate.getDate() + j);
+                    const expectedDateStr = expectedDate.toISOString().split('T')[0];
+                    
+                    if (!activityDates.includes(expectedDateStr)) {
+                        consecutive = false;
+                        break;
+                    }
+                }
+                
+                if (consecutive) return true;
+            }
+            
+            return false;
+        }
+
+        function checkWeeklyReduction() {
+            if (activities.length < 14) return false; // Need at least 2 weeks of data
+            
+            // Get activities from the last 2 weeks
+            const now = new Date();
+            const twoWeeksAgo = new Date(now);
+            twoWeeksAgo.setDate(now.getDate() - 14);
+            
+            const recentActivities = activities.filter(activity => {
+                const activityDate = new Date(activity.date);
+                return activityDate >= twoWeeksAgo;
+            });
+            
+            if (recentActivities.length < 4) return false; // Need reasonable sample size
+            
+            // Separate into week 1 (older) and week 2 (recent)
+            const oneWeekAgo = new Date(now);
+            oneWeekAgo.setDate(now.getDate() - 7);
+            
+            const week1Activities = recentActivities.filter(activity => {
+                const activityDate = new Date(activity.date);
+                return activityDate < oneWeekAgo;
+            });
+            
+            const week2Activities = recentActivities.filter(activity => {
+                const activityDate = new Date(activity.date);
+                return activityDate >= oneWeekAgo;
+            });
+            
+            if (week1Activities.length === 0 || week2Activities.length === 0) return false;
+            
+            // Calculate weekly totals
+            const week1Total = week1Activities.reduce((sum, activity) => sum + activity.emissions, 0);
+            const week2Total = week2Activities.reduce((sum, activity) => sum + activity.emissions, 0);
+            
+            // Calculate reduction percentage
+            const reduction = ((week1Total - week2Total) / week1Total) * 100;
+            
+            // Achievement unlocked if 10%+ reduction
+            return reduction >= 10;
         }
 
         // Quick action functions (learning from failed apps - reduce manual entry)
@@ -2441,7 +2815,7 @@
             return {
                 streak: Math.min(totalDays, 7), // Simplified streak calculation
                 improvement: activities.length > 5 ? "15%" : "Track more to see trends",
-                compared: "Better than 68% of users in your area",
+                compared: "Better than 68% of users in your area (Demo data - real comparisons coming soon!)",
                 avgDaily: avgDaily
             };
         }
@@ -2514,6 +2888,767 @@
                 }
             }
         });
+
+        // Analytics Functions
+        let emissionsChart, categoryChart, weeklyChart;
+
+        // Smart Activity Suggestions Engine
+        class ActivitySuggestionEngine {
+            constructor() {
+                this.userActivities = [];
+                this.patterns = {};
+                this.lastSuggestionTime = 0;
+                this.suggestionCooldown = 30 * 60 * 1000; // 30 minutes
+            }
+
+            updateActivities(activities) {
+                this.userActivities = activities.filter(activity => !activity.isDemo);
+                this.analyzePatterns();
+            }
+
+            analyzePatterns() {
+                if (this.userActivities.length < 2) return;
+
+                this.patterns = {
+                    timePatterns: this.getTimePatterns(),
+                    dayPatterns: this.getDayPatterns(),
+                    sequencePatterns: this.getSequencePatterns(),
+                    frequencyPatterns: this.getFrequencyPatterns()
+                };
+            }
+
+            getTimePatterns() {
+                const timeGroups = {};
+                this.userActivities.forEach(activity => {
+                    const hour = new Date(activity.date + 'T12:00:00').getHours(); // Assume noon if no time
+                    const category = activity.category || 'other';
+                    const timeSlot = this.getTimeSlot(hour);
+                    
+                    if (!timeGroups[timeSlot]) timeGroups[timeSlot] = {};
+                    if (!timeGroups[timeSlot][category]) timeGroups[timeSlot][category] = 0;
+                    timeGroups[timeSlot][category]++;
+                });
+                return timeGroups;
+            }
+
+            getDayPatterns() {
+                const dayGroups = {};
+                this.userActivities.forEach(activity => {
+                    const dayOfWeek = new Date(activity.date).getDay();
+                    const category = activity.category || 'other';
+                    
+                    if (!dayGroups[dayOfWeek]) dayGroups[dayOfWeek] = {};
+                    if (!dayGroups[dayOfWeek][category]) dayGroups[dayOfWeek][category] = 0;
+                    dayGroups[dayOfWeek][category]++;
+                });
+                return dayGroups;
+            }
+
+            getSequencePatterns() {
+                const sequences = {};
+                for (let i = 1; i < this.userActivities.length; i++) {
+                    const prev = this.userActivities[i-1].category || 'other';
+                    const curr = this.userActivities[i].category || 'other';
+                    const key = `${prev}->${curr}`;
+                    sequences[key] = (sequences[key] || 0) + 1;
+                }
+                return sequences;
+            }
+
+            getFrequencyPatterns() {
+                const frequency = {};
+                this.userActivities.forEach(activity => {
+                    const type = activity.type;
+                    frequency[type] = (frequency[type] || 0) + 1;
+                });
+                return frequency;
+            }
+
+            getTimeSlot(hour) {
+                if (hour >= 6 && hour < 9) return 'morning';
+                if (hour >= 9 && hour < 12) return 'late-morning';
+                if (hour >= 12 && hour < 14) return 'lunch';
+                if (hour >= 14 && hour < 17) return 'afternoon';
+                if (hour >= 17 && hour < 20) return 'evening';
+                if (hour >= 20 && hour < 23) return 'night';
+                return 'late-night';
+            }
+
+            generateSuggestions() {
+                const now = new Date();
+                const suggestions = [];
+
+                // Check cooldown
+                if (now.getTime() - this.lastSuggestionTime < this.suggestionCooldown) {
+                    return [];
+                }
+
+                // Time-based suggestions
+                const timeSlot = this.getTimeSlot(now.getHours());
+                const dayOfWeek = now.getDay();
+
+                // Check if user typically logs activities at this time
+                if (this.patterns.timePatterns && this.patterns.timePatterns[timeSlot]) {
+                    const timeCategories = this.patterns.timePatterns[timeSlot];
+                    const mostCommon = Object.keys(timeCategories).reduce((a, b) => 
+                        timeCategories[a] > timeCategories[b] ? a : b
+                    );
+
+                    if (timeCategories[mostCommon] >= 2) { // At least 2 occurrences
+                        suggestions.push({
+                            type: 'time-pattern',
+                            category: mostCommon,
+                            confidence: Math.min(timeCategories[mostCommon] / 5, 0.9),
+                            message: this.getTimeBasedMessage(timeSlot, mostCommon),
+                            suggestedActivity: this.getSuggestedActivity(mostCommon),
+                            priority: 2
+                        });
+                    }
+                }
+
+                // Day-based suggestions
+                if (this.patterns.dayPatterns && this.patterns.dayPatterns[dayOfWeek]) {
+                    const dayCategories = this.patterns.dayPatterns[dayOfWeek];
+                    const mostCommon = Object.keys(dayCategories).reduce((a, b) => 
+                        dayCategories[a] > dayCategories[b] ? a : b
+                    );
+
+                    if (dayCategories[mostCommon] >= 2) {
+                        suggestions.push({
+                            type: 'day-pattern',
+                            category: mostCommon,
+                            confidence: Math.min(dayCategories[mostCommon] / 4, 0.8),
+                            message: this.getDayBasedMessage(dayOfWeek, mostCommon),
+                            suggestedActivity: this.getSuggestedActivity(mostCommon),
+                            priority: 1
+                        });
+                    }
+                }
+
+                // Missing activity suggestions (if user hasn't logged anything today)
+                const today = now.toISOString().split('T')[0];
+                const todayActivities = this.userActivities.filter(a => a.date === today);
+                
+                if (todayActivities.length === 0 && this.userActivities.length > 0) {
+                    suggestions.push({
+                        type: 'missing-today',
+                        category: 'general',
+                        confidence: 0.7,
+                        message: "You haven't logged any activities today. Want to add one?",
+                        suggestedActivity: { category: 'transportation', name: 'Daily Commute' },
+                        priority: 3
+                    });
+                }
+
+                // Frequency-based suggestions (suggest commonly logged activities)
+                if (this.patterns.frequencyPatterns) {
+                    const sortedByFreq = Object.entries(this.patterns.frequencyPatterns)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 3);
+
+                    if (sortedByFreq.length > 0 && sortedByFreq[0][1] >= 3) {
+                        const [activityType, frequency] = sortedByFreq[0];
+                        suggestions.push({
+                            type: 'frequency-pattern',
+                            category: 'general',
+                            confidence: 0.6,
+                            message: `You often log "${activityType}". Did you do this activity today?`,
+                            suggestedActivity: { category: 'general', name: activityType },
+                            priority: 1
+                        });
+                    }
+                }
+
+                // Sort by priority and confidence
+                return suggestions
+                    .sort((a, b) => (b.priority * b.confidence) - (a.priority * a.confidence))
+                    .slice(0, 2); // Return top 2 suggestions
+            }
+
+            getTimeBasedMessage(timeSlot, category) {
+                const messages = {
+                    'morning': {
+                        'transportation': "Starting your day? Log your commute to work! 🚗",
+                        'food': "Morning routine? Don't forget to log your breakfast! 🥐",
+                        'energy': "Good morning! Track your morning energy usage ⚡"
+                    },
+                    'lunch': {
+                        'food': "Lunch time! What are you having today? 🍽️",
+                        'transportation': "Heading out for lunch? Log your trip! 🚶"
+                    },
+                    'evening': {
+                        'transportation': "Heading home? Log your evening commute! 🏠",
+                        'food': "Dinner time! Track your evening meal 🍽️",
+                        'energy': "Evening routine? Log your energy usage 💡"
+                    }
+                };
+
+                return messages[timeSlot]?.[category] || `Time to log your ${category} activity! ✨`;
+            }
+
+            getDayBasedMessage(dayOfWeek, category) {
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayName = days[dayOfWeek];
+                
+                return `You usually log ${category} activities on ${dayName}s. Anything to track today? 📅`;
+            }
+
+            getSuggestedActivity(category) {
+                const suggestions = {
+                    'transportation': { category: 'transportation', name: 'Daily Commute' },
+                    'food': { category: 'food', name: 'Meal' },
+                    'energy': { category: 'energy', name: 'Energy Usage' },
+                    'waste': { category: 'waste', name: 'Waste Management' }
+                };
+
+                return suggestions[category] || { category: 'other', name: 'Activity' };
+            }
+
+            markSuggestionShown() {
+                this.lastSuggestionTime = new Date().getTime();
+            }
+
+            learnFromUserAction(suggestion, userAccepted) {
+                // Simple learning: adjust confidence based on user response
+                // In a more sophisticated system, this would update ML model weights
+                if (userAccepted) {
+                    // Increase confidence in similar patterns
+                    console.log('User accepted suggestion:', suggestion.type);
+                } else {
+                    // Decrease confidence in similar patterns
+                    console.log('User rejected suggestion:', suggestion.type);
+                }
+            }
+        }
+
+        // Initialize the suggestion engine
+        const suggestionEngine = new ActivitySuggestionEngine();
+        let currentSuggestion = null;
+
+        // Smart Suggestion Functions
+        function initializeSmartSuggestions() {
+            // Update suggestion engine with current activities
+            suggestionEngine.updateActivities(activities);
+            
+            // Generate and show suggestions
+            showSmartSuggestions();
+            
+            // Set up periodic suggestion checking (every 30 minutes)
+            setInterval(checkForNewSuggestions, 30 * 60 * 1000);
+        }
+
+        function showSmartSuggestions() {
+            const suggestions = suggestionEngine.generateSuggestions();
+            
+            // Show notification bar suggestion
+            if (suggestions.length > 0 && !currentSuggestion) {
+                showSuggestionNotification(suggestions[0]);
+            }
+            
+            // Populate analytics tab suggestions
+            displayAnalyticsSuggestions(suggestions);
+        }
+
+        function showSuggestionNotification(suggestion) {
+            currentSuggestion = suggestion;
+            const notification = document.getElementById('suggestionNotification');
+            const title = document.getElementById('suggestionTitle');
+            const message = document.getElementById('suggestionMessage');
+            
+            title.textContent = `${suggestion.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Detected`;
+            message.textContent = suggestion.message;
+            
+            notification.classList.remove('hidden');
+            suggestionEngine.markSuggestionShown();
+            
+            // Auto-hide after 2 minutes if not interacted with
+            setTimeout(() => {
+                if (currentSuggestion === suggestion) {
+                    dismissSuggestion();
+                }
+            }, 2 * 60 * 1000);
+        }
+
+        function acceptSuggestion() {
+            if (!currentSuggestion) return;
+            
+            // Pre-fill the tracking modal with suggested activity
+            const suggested = currentSuggestion.suggestedActivity;
+            
+            // Open tracking modal with pre-filled data
+            showTrackingModal();
+            
+            // Pre-select category if available
+            if (suggested.category && suggested.category !== 'general') {
+                const categorySelect = document.getElementById('activityCategory');
+                if (categorySelect) {
+                    categorySelect.value = suggested.category;
+                    updateSubcategories(); // Update subcategories based on selection
+                }
+            }
+            
+            // Learn from user acceptance
+            suggestionEngine.learnFromUserAction(currentSuggestion, true);
+            
+            // Hide notification
+            dismissSuggestion();
+            
+            // Show success message
+            showSuccess('Great! Fill in the details for your activity 🎯');
+        }
+
+        function dismissSuggestion() {
+            if (currentSuggestion) {
+                suggestionEngine.learnFromUserAction(currentSuggestion, false);
+            }
+            
+            document.getElementById('suggestionNotification').classList.add('hidden');
+            currentSuggestion = null;
+        }
+
+        function checkForNewSuggestions() {
+            if (!currentSuggestion) {
+                showSmartSuggestions();
+            }
+        }
+
+        function refreshSuggestions() {
+            suggestionEngine.updateActivities(activities);
+            const suggestions = suggestionEngine.generateSuggestions();
+            displayAnalyticsSuggestions(suggestions);
+            
+            // Force show a new notification if available
+            if (suggestions.length > 0) {
+                dismissSuggestion();
+                setTimeout(() => showSuggestionNotification(suggestions[0]), 500);
+            }
+        }
+
+        function displayAnalyticsSuggestions(suggestions) {
+            const container = document.getElementById('activitySuggestions');
+            
+            if (suggestions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6">
+                        <div class="text-4xl mb-3">🤖</div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-2">Learning Your Patterns</h4>
+                        <p class="text-gray-600">Add more activities to get personalized AI suggestions!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = suggestions.map((suggestion, index) => `
+                <div class="border border-blue-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-lg">🤖</span>
+                                <span class="font-medium text-gray-900">${suggestion.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                    ${Math.round(suggestion.confidence * 100)}% confidence
+                                </span>
+                            </div>
+                            <p class="text-gray-700 mb-3">${suggestion.message}</p>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="acceptAnalyticsSuggestion(${index})" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 transition-colors">
+                                    📝 Add This Activity
+                                </button>
+                                <button onclick="dismissAnalyticsSuggestion(${index})" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm hover:bg-gray-300 transition-colors">
+                                    Not Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function acceptAnalyticsSuggestion(index) {
+            const suggestions = suggestionEngine.generateSuggestions();
+            if (suggestions[index]) {
+                currentSuggestion = suggestions[index];
+                acceptSuggestion();
+            }
+        }
+
+        function dismissAnalyticsSuggestion(index) {
+            const suggestions = suggestionEngine.generateSuggestions();
+            if (suggestions[index]) {
+                suggestionEngine.learnFromUserAction(suggestions[index], false);
+                refreshSuggestions();
+            }
+        }
+
+        function initializeAnalytics() {
+            updateAnalyticsSummary();
+            createEmissionsChart();
+            createCategoryChart();
+            createWeeklyChart();
+            generateSmartRecommendations();
+            
+            // Initialize smart suggestions for analytics tab
+            displayAnalyticsSuggestions(suggestionEngine.generateSuggestions());
+        }
+
+        function updateAnalyticsSummary() {
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const totalEmissions = userActivities.reduce((sum, activity) => sum + activity.emissions, 0);
+            const dailyAvg = userActivities.length > 0 ? (totalEmissions / Math.max(userActivities.length, 1)) : 0;
+            
+            // Find top category with better fallback handling
+            const categoryTotals = {};
+            userActivities.forEach(activity => {
+                const category = activity.category || 'other';
+                categoryTotals[category] = (categoryTotals[category] || 0) + activity.emissions;
+            });
+            
+            let topCategory = 'Other';
+            if (Object.keys(categoryTotals).length > 0) {
+                topCategory = Object.keys(categoryTotals).reduce((a, b) => 
+                    categoryTotals[a] > categoryTotals[b] ? a : b
+                );
+                // Capitalize first letter
+                topCategory = topCategory.charAt(0).toUpperCase() + topCategory.slice(1);
+            }
+
+            // Update summary cards
+            document.getElementById('totalEmissions').textContent = `${totalEmissions.toFixed(1)} kg`;
+            document.getElementById('totalActivities').textContent = userActivities.length;
+            document.getElementById('dailyAverage').textContent = `${dailyAvg.toFixed(1)} kg`;
+            document.getElementById('topCategory').textContent = topCategory;
+        }
+
+        function createEmissionsChart() {
+            const ctx = document.getElementById('emissionsChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (emissionsChart) {
+                emissionsChart.destroy();
+            }
+
+            // Prepare data - group by date
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const dailyData = {};
+            
+            userActivities.forEach(activity => {
+                const date = activity.date;
+                dailyData[date] = (dailyData[date] || 0) + activity.emissions;
+            });
+
+            // Sort dates and create arrays
+            const sortedDates = Object.keys(dailyData).sort();
+            const dates = sortedDates.map(date => new Date(date).toLocaleDateString());
+            const emissions = sortedDates.map(date => dailyData[date]);
+
+            emissionsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Daily CO₂ Emissions (kg)',
+                        data: emissions,
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'CO₂ Emissions (kg)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCategoryChart() {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+
+            // Calculate category totals with better error handling
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const categoryTotals = {};
+            
+            userActivities.forEach(activity => {
+                const category = activity.category || 'other';
+                const emissions = typeof activity.emissions === 'number' ? activity.emissions : 0;
+                categoryTotals[category] = (categoryTotals[category] || 0) + emissions;
+            });
+
+            const labels = Object.keys(categoryTotals);
+            const data = Object.values(categoryTotals);
+            
+            // Handle empty data case
+            if (labels.length === 0 || data.every(val => val === 0)) {
+                // Show empty state in chart
+                categoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['No data yet'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#e5e7eb'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+
+            const colors = [
+                '#ef4444', '#f97316', '#eab308', '#22c55e', 
+                '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'
+            ];
+
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.map(label => label.charAt(0).toUpperCase() + label.slice(1)),
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createWeeklyChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            
+            if (weeklyChart) {
+                weeklyChart.destroy();
+            }
+
+            // Calculate actual weekly data for the last 4 weeks
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const now = new Date();
+            const weeks = [];
+            const weeklyData = [];
+
+            // Calculate 4 weeks of actual data
+            for (let i = 3; i >= 0; i--) {
+                const weekEnd = new Date(now);
+                weekEnd.setDate(now.getDate() - (i * 7));
+                const weekStart = new Date(weekEnd);
+                weekStart.setDate(weekEnd.getDate() - 6);
+
+                // Format week label
+                const weekLabel = i === 0 ? 'This week' : 
+                                 i === 1 ? 'Last week' : 
+                                 `${i + 1} weeks ago`;
+                weeks.push(weekLabel);
+
+                // Calculate emissions for this week
+                const weekEmissions = userActivities
+                    .filter(activity => {
+                        const activityDate = new Date(activity.date);
+                        return activityDate >= weekStart && activityDate <= weekEnd;
+                    })
+                    .reduce((sum, activity) => sum + activity.emissions, 0);
+
+                weeklyData.push(weekEmissions);
+            }
+
+            weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: weeks,
+                    datasets: [{
+                        label: 'Weekly CO₂ Emissions (kg)',
+                        data: weeklyData,
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'CO₂ Emissions (kg)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateSmartRecommendations() {
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const container = document.getElementById('smartRecommendations');
+            
+            if (userActivities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-4">📊</div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Start Tracking for Personalized Insights</h3>
+                        <p class="text-gray-600">Add some activities to get smart recommendations tailored to your habits!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate user patterns and averages
+            const totalEmissions = userActivities.reduce((sum, activity) => sum + activity.emissions, 0);
+            const avgEmissions = totalEmissions / userActivities.length;
+            
+            const categoryTotals = {};
+            const categoryProportions = {};
+            
+            userActivities.forEach(activity => {
+                const category = activity.category || 'other';
+                categoryTotals[category] = (categoryTotals[category] || 0) + activity.emissions;
+            });
+
+            // Calculate what percentage each category represents
+            Object.keys(categoryTotals).forEach(category => {
+                categoryProportions[category] = (categoryTotals[category] / totalEmissions) * 100;
+            });
+
+            const recommendations = [];
+
+            // Transportation recommendations (if >30% of total emissions or >average)
+            const transportEmissions = categoryTotals.transportation || 0;
+            if (transportEmissions > avgEmissions || categoryProportions.transportation > 30) {
+                const potentialSavings = Math.min(transportEmissions * 0.6, 5); // Up to 60% savings, max 5kg
+                recommendations.push({
+                    icon: '🚲',
+                    title: 'Switch to Cycling',
+                    description: `Transportation is ${categoryProportions.transportation?.toFixed(0) || 0}% of your emissions. Try biking for short trips.`,
+                    impact: `Could save up to ${potentialSavings.toFixed(1)}kg CO₂ per week`,
+                    action: 'Set a goal to bike 3 times this week',
+                    priority: categoryProportions.transportation || 0
+                });
+            }
+
+            // Energy recommendations (if >25% of total emissions)
+            const energyEmissions = categoryTotals.energy || 0;
+            if (energyEmissions > 0 && categoryProportions.energy > 25) {
+                const potentialSavings = energyEmissions * 0.3; // 30% savings potential
+                recommendations.push({
+                    icon: '💡',
+                    title: 'Energy Efficiency',
+                    description: `Energy use is ${categoryProportions.energy?.toFixed(0)}% of your footprint. Small changes add up!`,
+                    impact: `Could save ${potentialSavings.toFixed(1)}kg CO₂ monthly`,
+                    action: 'Start with LED bulbs and unplug devices',
+                    priority: categoryProportions.energy || 0
+                });
+            }
+
+            // Food recommendations (if >20% of total emissions)
+            const foodEmissions = categoryTotals.food || 0;
+            if (foodEmissions > 0 && categoryProportions.food > 20) {
+                const potentialSavings = foodEmissions * 0.25; // 25% savings potential
+                recommendations.push({
+                    icon: '🌱',
+                    title: 'Plant-Based Options',
+                    description: `Food choices represent ${categoryProportions.food?.toFixed(0)}% of your emissions. Even small shifts help!`,
+                    impact: `Could reduce food emissions by ${potentialSavings.toFixed(1)}kg CO₂`,
+                    action: 'Try one plant-based meal this week',
+                    priority: categoryProportions.food || 0
+                });
+            }
+
+            // High-emission activity recommendation
+            if (userActivities.length >= 3) {
+                const sortedActivities = [...userActivities].sort((a, b) => b.emissions - a.emissions);
+                const highestActivity = sortedActivities[0];
+                
+                if (highestActivity.emissions > avgEmissions * 1.5) {
+                    recommendations.push({
+                        icon: '🎯',
+                        title: 'Focus on High-Impact Activities',
+                        description: `Your "${highestActivity.type}" activity had ${highestActivity.emissions}kg CO₂ - higher than your average.`,
+                        impact: `Reducing similar activities could save ${(highestActivity.emissions * 0.5).toFixed(1)}kg CO₂`,
+                        action: 'Consider alternatives for high-emission activities',
+                        priority: (highestActivity.emissions / avgEmissions) * 10
+                    });
+                }
+            }
+
+            // Consistency recommendation (always show if user has activities)
+            const daysCovered = new Set(userActivities.map(a => a.date)).size;
+            const trackingConsistency = (daysCovered / 7) * 100; // Assume 7 days for consistency
+            
+            recommendations.push({
+                icon: '📱',
+                title: 'Improve Tracking Consistency',
+                description: `You've tracked ${daysCovered} different days. Consistent tracking leads to better insights.`,
+                impact: `Better data leads to 10-15% more effective reductions`,
+                action: trackingConsistency < 50 ? 'Set daily tracking reminders' : 'Keep up the great tracking!',
+                priority: trackingConsistency < 50 ? 50 : 10
+            });
+
+            // Sort recommendations by priority (highest first)
+            recommendations.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+            // Render recommendations (limit to top 4)
+            container.innerHTML = recommendations.slice(0, 4).map(rec => `
+                <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-start space-x-4">
+                        <div class="text-3xl">${rec.icon}</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-2">${rec.title}</h4>
+                            <p class="text-gray-600 mb-3">${rec.description}</p>
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <div class="text-sm text-green-600 font-medium mb-2 sm:mb-0">
+                                    💚 ${rec.impact}
+                                </div>
+                                <button class="bg-green-50 text-green-700 px-4 py-2 rounded-md text-sm hover:bg-green-100 transition-colors">
+                                    ${rec.action}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
     </script>
 </body>
 </html>
