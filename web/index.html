@@ -793,7 +793,7 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-green-100 text-sm">Total CO₂ Tracked</p>
-                                    <p class="text-2xl font-bold" id="totalEmissions">0 kg</p>
+                                    <p class="text-2xl font-bold" id="analyticsTotalEmissions">0 kg</p>
                                 </div>
                                 <div class="text-3xl">🌍</div>
                             </div>
@@ -1281,6 +1281,43 @@
 
         // Start live updates when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loading - checking for saved session...');
+            
+            // Check for existing login session
+            const savedUser = localStorage.getItem('carbonSense_currentUser');
+            console.log('Saved user:', savedUser);
+            
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    console.log('Restored current user:', currentUser);
+                    
+                    // Load user's activities
+                    activities = loadUserActivities(currentUser.email);
+                    console.log('Loaded activities:', activities);
+                    
+                    // Set demo mode based on whether this is first time
+                    isDemoMode = isFirstTimeUser(currentUser.email);
+                    console.log('Demo mode set to:', isDemoMode);
+                    
+                    // Show dashboard instead of landing page
+                    showDashboard();
+                    
+                    // Force update analytics summary after session restore
+                    setTimeout(() => {
+                        console.log('Forcing analytics update...');
+                        updateAnalyticsSummary();
+                    }, 500);
+                } catch (error) {
+                    console.error('Error restoring user session:', error);
+                    localStorage.removeItem('carbonSense_currentUser');
+                    showLandingPage(); // Show landing page if session restore fails
+                }
+            } else {
+                console.log('No saved session found');
+                showLandingPage(); // Show landing page if no session
+            }
+            
             updateCommunityStats(); // Use real community stats instead of fake animations
             // Update community stats every 30 seconds (less frequent, more realistic)
             setInterval(updateCommunityStats, 30000);
@@ -1305,7 +1342,9 @@
         function loadUserActivities(userEmail) {
             const userActivitiesKey = `carbonSense_activities_${userEmail}`;
             const savedActivities = localStorage.getItem(userActivitiesKey);
-            return savedActivities ? JSON.parse(savedActivities) : [];
+            const loaded = savedActivities ? JSON.parse(savedActivities) : [];
+            console.log(`Loading activities for ${userEmail}:`, loaded);
+            return loaded;
         }
 
         function saveUserActivities(userEmail, userActivities) {
@@ -1352,7 +1391,7 @@
             let totalEmissions = 0;
             
             analysisData.forEach(activity => {
-                const type = activity.type.split(' - ')[0]; // Get main category
+                const type = activity.category || activity.type.split(' - ')[0]; // Use category field, fallback to parsing
                 if (!activityByType[type]) {
                     activityByType[type] = { count: 0, emissions: 0, types: new Set() };
                 }
@@ -1362,19 +1401,29 @@
                 totalEmissions += activity.emissions;
             });
 
+            // Debug logging
+            console.log('Activity analysis:', {
+                analysisData: analysisData,
+                activityByType: activityByType,
+                totalEmissions: totalEmissions
+            });
+
             // Sort categories by emissions impact
             const sortedCategories = Object.entries(activityByType)
                 .sort(([,a], [,b]) => b.emissions - a.emissions);
 
             // Transportation recommendations
-            if (activityByType.Transportation) {
-                const transData = activityByType.Transportation;
+            if (activityByType.transportation || activityByType.Transportation) {
+                const transData = activityByType.transportation || activityByType.Transportation;
                 const avgEmissions = transData.emissions / transData.count;
+                const hasCar = [...transData.types].some(type => type.toLowerCase().includes('car') || type.toLowerCase().includes('petrol') || type.toLowerCase().includes('diesel'));
                 
                 if (avgEmissions > 15) {
                     recommendations.push('🚗 Consider carpooling or public transport - your transport emissions are higher than average');
-                } else if (transData.types.has('Transportation - Car')) {
+                } else if (hasCar && avgEmissions > 2) {
                     recommendations.push('🚌 Try public transport 2-3 days per week to reduce car usage');
+                } else if (hasCar) {
+                    recommendations.push('🚗 Consider carpooling for your commute to reduce emissions');
                 } else if (transData.count > 10) {
                     recommendations.push('🚴 Add cycling or walking for short trips under 5km');
                 }
@@ -1383,9 +1432,9 @@
             }
 
             // Food recommendations
-            if (activityByType.Food) {
-                const foodData = activityByType.Food;
-                const hasMeat = [...foodData.types].some(type => type.includes('Meat'));
+            if (activityByType.food || activityByType.Food) {
+                const foodData = activityByType.food || activityByType.Food;
+                const hasMeat = [...foodData.types].some(type => type.includes('Meat') || type.includes('Chicken') || type.includes('Beef') || type.includes('Pork'));
                 const avgEmissions = foodData.emissions / foodData.count;
                 
                 if (hasMeat && avgEmissions > 5) {
@@ -1402,8 +1451,8 @@
             }
 
             // Energy recommendations
-            if (activityByType.Energy) {
-                const energyData = activityByType.Energy;
+            if (activityByType.energy || activityByType.Energy) {
+                const energyData = activityByType.energy || activityByType.Energy;
                 const avgEmissions = energyData.emissions / energyData.count;
                 
                 if (avgEmissions > 10) {
@@ -1415,6 +1464,26 @@
                 }
             } else {
                 recommendations.push('🏠 Track home energy usage to identify efficiency opportunities');
+            }
+
+            // Waste recommendations
+            if (activityByType.waste || activityByType.Waste) {
+                const wasteData = activityByType.waste || activityByType.Waste;
+                const hasOrganic = [...wasteData.types].some(type => type.includes('Organic'));
+                const hasRecycling = [...wasteData.types].some(type => type.includes('Recycling'));
+                const avgEmissions = wasteData.emissions / wasteData.count;
+                
+                if (hasOrganic) {
+                    recommendations.push('🌱 Great job composting! Consider expanding your organic waste program');
+                } else if (avgEmissions > 1) {
+                    recommendations.push('♻️ Try composting organic waste to reduce landfill emissions');
+                }
+                
+                if (!hasRecycling && wasteData.count > 2) {
+                    recommendations.push('📦 Consider recycling more materials to reduce waste footprint');
+                }
+            } else {
+                recommendations.push('🗑️ Track your waste to identify recycling and composting opportunities');
             }
 
             // Time-based recommendations
@@ -1450,6 +1519,17 @@
                 } else {
                     recommendations.push('📊 Aim to reduce weekly emissions by 10% - small changes add up!');
                 }
+            }
+
+            // Positive recognition for good practices
+            if (activityByType.waste && [...(activityByType.waste.types || [])].some(type => type.includes('Organic'))) {
+                recommendations.push('🌟 Excellent work composting organic waste - you\'re reducing methane emissions!');
+            }
+            
+            if (totalEmissions > 0 && totalEmissions < 10) {
+                recommendations.push('🎯 Your daily emissions are below 10kg CO₂ - keep up the great work!');
+            } else if (totalEmissions < 20) {
+                recommendations.push('📊 You\'re tracking your impact well - small improvements add up over time');
             }
 
             // Seasonal recommendations
@@ -1841,6 +1921,7 @@
             
             // Initialize specific tab content
             if (tabName === 'social') {
+                generateSocialPostsForExistingActivities(); // Generate posts for existing activities
                 updateSocialFeed();
                 updateCommunityStats();
             } else if (tabName === 'analytics') {
@@ -2010,6 +2091,9 @@
                 location_type: user.location_type || 'urban' // Default location type
             };
 
+            // Save login session to localStorage
+            localStorage.setItem('carbonSense_currentUser', JSON.stringify(currentUser));
+
             // Load user's activities
             activities = loadUserActivities(email);
             
@@ -2021,6 +2105,10 @@
             return true;
         }        function logout() {
             currentUser = null;
+            
+            // Clear login session from localStorage
+            localStorage.removeItem('carbonSense_currentUser');
+            
             showLandingPage();
         }
 
@@ -2104,11 +2192,16 @@
 
         // Dashboard Functions
         function populateDashboard() {
+            console.log('Populating dashboard with activities:', activities);
+            
             populateActivities();
             populateRecommendations();
             populateAchievements();
             updateStats();
             updateProgressMotivation(); // Learning from failed apps
+            
+            // Generate social posts for existing activities before initializing feed
+            generateSocialPostsForExistingActivities();
             updateSocialFeed(); // Initialize social feed with data
             
             // Initialize smart suggestions
@@ -2184,6 +2277,10 @@
             
             // Generate fresh, personalized recommendations
             const personalizedRecommendations = generatePersonalizedRecommendations();
+            
+            // Debug logging to see what's happening
+            console.log('Current activities for recommendations:', activities.filter(a => !a.isDemo));
+            console.log('Generated recommendations:', personalizedRecommendations);
             
             personalizedRecommendations.forEach(recommendation => {
                 const recDiv = document.createElement('div');
@@ -2393,7 +2490,7 @@
         }
 
         // Social Feed Functions
-        let socialFeedData = [
+        let socialFeedData = JSON.parse(localStorage.getItem('carbonSense_socialFeed') || JSON.stringify([
             {
                 id: 1,
                 user: "Sarah Martinez",
@@ -2426,7 +2523,7 @@
                 comments: 23,
                 shares: 15
             }
-        ];
+        ]));
 
         function addToSocialFeed(activity) {
             const userName = currentUser?.name || "You";
@@ -2497,12 +2594,19 @@
             };
 
             socialFeedData.unshift(newPost);
+            
+            // Save to localStorage
+            localStorage.setItem('carbonSense_socialFeed', JSON.stringify(socialFeedData));
+            
             updateSocialFeed();
         }
 
         function updateSocialFeed() {
             const container = document.getElementById('socialFeedPosts');
             if (!container) return;
+
+            // Debug logging
+            console.log('Updating social feed with posts:', socialFeedData.length);
 
             const colors = {
                 green: 'bg-green-200 text-green-600',
@@ -2566,11 +2670,106 @@
             const post = socialFeedData.find(p => p.id === postId);
             if (post) {
                 post.likes += 1;
+                
+                // Save to localStorage
+                localStorage.setItem('carbonSense_socialFeed', JSON.stringify(socialFeedData));
+                
                 const likesElement = document.getElementById(`likes-${postId}`);
                 if (likesElement) {
                     likesElement.textContent = post.likes;
                 }
             }
+        }
+
+        function generateSocialPostsForExistingActivities() {
+            // Generate posts for user's activities that aren't already in social feed
+            const userActivities = activities.filter(activity => !activity.isDemo);
+            const existingActivityIds = new Set(socialFeedData.map(post => post.activityId).filter(id => id));
+            
+            userActivities.forEach(activity => {
+                if (!existingActivityIds.has(activity.id) && (activity.emissions > 0.1 || activity.category === 'waste')) {
+                    // Generate a social post but with older timestamp
+                    const activityDate = new Date(activity.date);
+                    const now = new Date();
+                    const diffDays = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24));
+                    
+                    let timeText = "just now";
+                    if (diffDays === 0) {
+                        timeText = "today";
+                    } else if (diffDays === 1) {
+                        timeText = "1 day ago";
+                    } else if (diffDays < 7) {
+                        timeText = `${diffDays} days ago`;
+                    } else {
+                        timeText = `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+                    }
+
+                    const userName = currentUser?.name || "You";
+                    const userInitial = userName.charAt(0).toUpperCase();
+                    
+                    // Generate activity description
+                    let activityText = "";
+                    let achievementIcon = "🌱";
+                    let achievementTitle = "Climate Action Complete!";
+                    
+                    switch (activity.category) {
+                        case 'transportation':
+                            activityText = `Tracked my transportation impact: ${activity.amount}${activity.unit}. Working to reduce my carbon footprint one trip at a time! #ClimateAware`;
+                            achievementIcon = "🚗";
+                            achievementTitle = "Transportation Tracked!";
+                            break;
+                        case 'energy':
+                            activityText = `Monitored my energy usage: ${activity.amount}${activity.unit}. Tracking usage is the first step to reducing my home's carbon footprint! #EnergyEfficiency`;
+                            achievementIcon = "⚡";
+                            achievementTitle = "Energy Monitoring!";
+                            break;
+                        case 'food':
+                            activityText = `Tracked my food choices: ${activity.amount}${activity.unit}. Being mindful about what I eat and its climate impact! #ConsciousEating`;
+                            achievementIcon = "🍽️";
+                            achievementTitle = "Food Impact Tracked!";
+                            break;
+                        case 'waste':
+                            activityText = `Properly managed ${activity.amount}${activity.unit} of waste! ♻️ Every bit of proper waste handling helps our planet. #WasteReduction`;
+                            achievementIcon = "♻️";
+                            achievementTitle = "Waste Management!";
+                            break;
+                        default:
+                            activityText = `Completed a climate action: ${activity.type}. Every step towards sustainability matters! #ClimateAction`;
+                    }
+
+                    const newPost = {
+                        id: Date.now() + Math.random(), // Ensure unique ID
+                        activityId: activity.id,
+                        user: userName,
+                        userInitial: userInitial,
+                        userColor: "purple",
+                        time: timeText,
+                        text: activityText,
+                        achievement: {
+                            icon: achievementIcon,
+                            title: achievementTitle,
+                            co2: `${activity.emissions}kg CO₂ Impact`
+                        },
+                        likes: 0,
+                        comments: 0,
+                        shares: 0
+                    };
+
+                    socialFeedData.push(newPost); // Add to end since it's older
+                }
+            });
+            
+            // Sort by timestamp (newest first)
+            socialFeedData.sort((a, b) => {
+                if (a.time === "just now") return -1;
+                if (b.time === "just now") return 1;
+                if (a.time === "today") return -1;
+                if (b.time === "today") return 1;
+                return 0; // Keep relative order for other posts
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('carbonSense_socialFeed', JSON.stringify(socialFeedData));
         }
 
         function addActivity(category, subcategory, amount, description = '') {
@@ -2597,7 +2796,8 @@
                 unit: config.unit,
                 emissions: Math.round(emissions * 100) / 100, // Round to 2 decimal places
                 date: new Date().toISOString().split('T')[0],
-                description: description
+                description: description,
+                isDemo: false // Explicitly mark as real user activity
             };
             
             activities.unshift(newActivity);
@@ -2613,6 +2813,27 @@
             populateActivities();
             updateStats();
             
+            // Update analytics summary if on analytics tab
+            updateAnalyticsSummary();
+            
+            // Update social feed if on social tab
+            const socialTab = document.querySelector('[data-tab="social"]');
+            if (socialTab && socialTab.classList.contains('border-green-500')) {
+                // We're on social tab, refresh the feed
+                updateSocialFeed();
+            }
+            
+            // Update charts if on analytics tab
+            const analyticsTab = document.querySelector('[data-tab="analytics"]');
+            if (analyticsTab && analyticsTab.classList.contains('border-green-500')) {
+                // We're on analytics tab, refresh the charts
+                setTimeout(() => {
+                    if (typeof createEmissionsChart === 'function') createEmissionsChart();
+                    if (typeof createCategoryChart === 'function') createCategoryChart();
+                    if (typeof createWeeklyChart === 'function') createWeeklyChart();
+                }, 200);
+            }
+            
             // Update AI recommendations based on new activity
             populateRecommendations();
             
@@ -2622,8 +2843,8 @@
             // Check for achievements
             checkAchievements();
             
-            // Add to social feed if it's a significant activity
-            if (newActivity.emissions > 1) { // Only post activities that save more than 1kg CO2
+            // Add to social feed for most activities (show engagement)
+            if (newActivity.emissions > 0.1 || newActivity.category === 'waste') { // Include most activities, especially waste tracking
                 addToSocialFeed(newActivity);
             }
         }
@@ -2646,11 +2867,14 @@
                 );
                 if (socialPostIndex !== -1) {
                     socialFeedData.splice(socialPostIndex, 1);
+                    // Save updated social feed
+                    localStorage.setItem('carbonSense_socialFeed', JSON.stringify(socialFeedData));
                 }
                 
                 // Update all displays
                 populateActivities();
                 updateStats();
+                updateAnalyticsSummary();
                 populateRecommendations();
                 updateSocialFeed();
                 
@@ -2860,9 +3084,7 @@
         });
 
         // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            showLandingPage();
-        });
+        // Removed conflicting DOMContentLoaded - handled in main session logic above
 
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
@@ -3296,6 +3518,14 @@
             const totalEmissions = userActivities.reduce((sum, activity) => sum + activity.emissions, 0);
             const dailyAvg = userActivities.length > 0 ? (totalEmissions / Math.max(userActivities.length, 1)) : 0;
             
+            // Debug logging
+            console.log('Analytics Summary Debug:', {
+                allActivities: activities,
+                userActivities: userActivities,
+                totalEmissions: totalEmissions,
+                dailyAvg: dailyAvg
+            });
+            
             // Find top category with better fallback handling
             const categoryTotals = {};
             userActivities.forEach(activity => {
@@ -3313,7 +3543,14 @@
             }
 
             // Update summary cards
-            document.getElementById('totalEmissions').textContent = `${totalEmissions.toFixed(1)} kg`;
+            console.log('Updating analytics UI with:', {
+                totalEmissions: totalEmissions.toFixed(1),
+                totalActivities: userActivities.length,
+                dailyAverage: dailyAvg.toFixed(1),
+                topCategory: topCategory
+            });
+            
+            document.getElementById('analyticsTotalEmissions').textContent = `${totalEmissions.toFixed(1)} kg`;
             document.getElementById('totalActivities').textContent = userActivities.length;
             document.getElementById('dailyAverage').textContent = `${dailyAvg.toFixed(1)} kg`;
             document.getElementById('topCategory').textContent = topCategory;
