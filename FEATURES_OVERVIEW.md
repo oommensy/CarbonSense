@@ -5,10 +5,11 @@
 
 CarbonSense is a fully-functional web application for carbon footprint tracking with social features, analytics, and AI-powered recommendations. Built as a single-page application with local storage persistence, it demonstrates complete user journeys from onboarding to advanced engagement.
 
-**Current Status:** ✅ Production-ready MVP with full feature set
+**Current Status:** ✅ Production-ready MVP with full feature set (Latest: Critical bug fixes applied)
 **Architecture:** Single-page web application (HTML/CSS/JavaScript)
 **Data Persistence:** Browser localStorage with user session management
 **Demo Mode:** Transparent baseline values with automatic transition to real data
+**Latest Updates (Oct 15, 2025):** Analytics display fix, session persistence, AI recommendations enhancement
 
 ---
 
@@ -18,8 +19,9 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 - **User Registration:** Full name, email, password with validation
 - **User Login:** Email/password authentication with session management
 - **Profile Management:** Age, household size, location type configuration
-- **Session Persistence:** Automatic login state preservation across browser sessions
+- **Session Persistence:** ✅ **FIXED** - Automatic login state preservation across browser sessions (resolved logout on refresh)
 - **User Data Isolation:** Each user has separate activity tracking and progress
+- **Session Recovery:** Automatic restoration of user state with error handling
 
 ### Demo Tour System
 - **Interactive Walkthrough:** 4-step guided tour for new users
@@ -52,13 +54,14 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 ## 📈 Advanced Analytics Dashboard
 
 ### Personal Analytics
-- **Summary Cards:** Total emissions, activity count, daily average, trend analysis
+- **Summary Cards:** ✅ **FIXED** - Total emissions, activity count, daily average, trend analysis (resolved 0kg display issue)
 - **Interactive Charts (Chart.js):**
   - Weekly emissions line chart with trend visualization
   - Activity breakdown doughnut chart by category
   - Monthly comparison bar chart
-- **Data-Driven Insights:** Real calculations from user's actual activities
+- **Data-Driven Insights:** Real calculations from user's actual activities with real-time updates
 - **Responsive Design:** Charts adapt to different screen sizes
+- **HTML ID Resolution:** Fixed duplicate element conflicts for accurate data display
 
 ### Progress Tracking
 - **Historical Analysis:** View emissions patterns over time
@@ -71,14 +74,15 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 ## 🤖 AI-Powered Smart Recommendations
 
 ### Machine Learning Engine
-- **Pattern Recognition:** Analyzes user activity patterns for personalized suggestions
+- **Pattern Recognition:** ✅ **ENHANCED** - Analyzes user activity patterns for personalized suggestions (fixed category detection)
 - **Multi-Factor Analysis:**
   - Time-based patterns (morning/afternoon/evening preferences)
-  - Day-of-week behavioral patterns
+  - Day-of-week behavioral patterns  
   - Activity sequence learning
-  - Emission level optimization
+  - Emission level optimization with waste category support
 - **Confidence Scoring:** Each suggestion includes confidence percentage
 - **Learning Feedback:** System improves recommendations based on user actions
+- **Real-time Updates:** Recommendations refresh immediately when activities are added/deleted
 
 ### Intelligent Suggestions
 - **Contextual Recommendations:** Suggestions based on current time and day
@@ -87,10 +91,12 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 - **Notification System:** Proactive suggestions appear with timing intelligence
 
 ### Suggestion Categories
-- **Transportation:** Alternative commute options, trip optimization
+- **Transportation:** Alternative commute options, trip optimization, carpool suggestions
 - **Energy:** Usage reduction tips, efficiency improvements
-- **Food:** Lower-emission meal suggestions, local sourcing
+- **Food:** Lower-emission meal suggestions, local sourcing, plant-based recommendations
+- **Waste:** ✅ **NEW** - Composting recognition, recycling optimization, waste reduction tips
 - **Lifestyle:** Sustainable alternatives for daily activities
+- **Positive Recognition:** Celebrates good practices like composting and low-emission choices
 
 ---
 
@@ -114,16 +120,20 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 ## 👥 Social Features
 
 ### Social Feed System
-- **Community Posts:** Users can view climate action updates and achievements
+- **Community Posts:** ✅ **ENHANCED** - Users can view climate action updates and achievements with localStorage persistence
 - **Post Display:** Visual feed with user profiles, timestamps, and achievement highlights
 - **Achievement Sharing:** Automatic community notifications when users unlock achievements
-- **Engagement Ready:** Framework for likes, comments, and sharing (post creation UI exists)
+- **Engagement Ready:** ✅ **IMPROVED** - Framework for likes, comments, and sharing with real-time updates
+- **Auto-Post Generation:** ✅ **NEW** - Existing activities automatically converted to social posts with proper timestamps
+- **Lowered Threshold:** ✅ **IMPROVED** - More inclusive posting (0.1kg vs 1kg threshold) for better engagement
+- **Real-time Sync:** ✅ **FIXED** - Feed updates immediately when adding activities while on social tab
 
 ### Community Statistics
 - **Real-time Metrics:** Dynamic community impact calculations based on actual user data
 - **Aggregate Analytics:** Total community CO₂ awareness impact and member growth
 - **Activity Tracking:** Live monitoring of daily community actions
 - **Transparent Demo Mode:** Clear indicators when showing baseline vs real community data
+- **Data Persistence:** ✅ **NEW** - Social interactions persist across browser sessions
 
 **Note:** Full social interaction features (commenting, advanced posting) are in placeholder stage with "ready for enhancement" status.
 
@@ -277,21 +287,56 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 
 ---
 
-## 📋 Implementation Status
+## � Recent Critical Bug Fixes (Oct 15, 2025)
+
+### Analytics Dashboard Resolution
+- **Issue:** Analytics showed 0kg total emissions despite logged activities
+- **Root Cause:** Duplicate HTML element IDs causing DOM update conflicts
+- **Fix:** Renamed analytics IDs and updated JavaScript selectors
+- **Impact:** Analytics now display accurate CO₂ totals and activity counts
+
+### Session Persistence Fix
+- **Issue:** Users logged out on page refresh despite login
+- **Root Cause:** Conflicting DOMContentLoaded listeners overriding session restoration
+- **Fix:** Removed conflicting initialization and enhanced session logic
+- **Impact:** Users now stay logged in across browser sessions
+
+### AI Recommendations Enhancement
+- **Issue:** Recommendations showed generic suggestions instead of personalized ones
+- **Root Cause:** Category detection parsing activity.type instead of activity.category
+- **Fix:** Updated recommendation engine to use proper category fields
+- **Impact:** AI now provides personalized suggestions based on actual user behavior
+
+### Social Feed Improvements
+- **Issue:** Social posts didn't persist and had limited engagement
+- **Root Cause:** No localStorage persistence and restrictive posting thresholds
+- **Fix:** Added persistence, lowered thresholds, enhanced real-time updates
+- **Impact:** Engaging social experience with activity history and real-time updates
+
+### Technical Debt Resolution
+- **HTML ID Conflicts:** Resolved duplicate totalEmissions IDs between dashboard and analytics
+- **Race Conditions:** Fixed session restoration timing issues
+- **Data Synchronization:** Enhanced cross-tab data consistency
+- **Error Handling:** Improved debugging and error recovery mechanisms
+
+---
+
+## �📋 Implementation Status
 
 ### ✅ Fully Implemented Features
-- [x] User registration and authentication system
-- [x] Carbon footprint activity logging with smart calculations
-- [x] Advanced analytics dashboard with interactive charts (Chart.js)
-- [x] AI-powered recommendation engine with machine learning patterns
+- [x] User registration and authentication system with session persistence
+- [x] Carbon footprint activity logging with smart calculations and real-time updates
+- [x] Advanced analytics dashboard with interactive charts (Chart.js) - **FIXED: Display issues resolved**
+- [x] AI-powered recommendation engine with machine learning patterns - **ENHANCED: Category detection fixed**
 - [x] Achievement system with realistic validation logic (First Steps, Week Warrior, Carbon Reducer)
-- [x] Social features with community engagement and real-time stats
+- [x] Social features with community engagement and real-time stats - **ENHANCED: Persistence & auto-posting**
 - [x] Responsive web design optimized for desktop and mobile browsers
 - [x] Demo transparency system with automatic transitions
-- [x] Data persistence and user session management via localStorage
+- [x] Data persistence and user session management via localStorage - **FIXED: Session logout issues**
 - [x] Real-time community statistics with dynamic updates
-- [x] Overview and Analytics tabs with full functionality
-- [x] Social tab with community impact and live feed features
+- [x] Overview and Analytics tabs with full functionality - **FIXED: Analytics 0kg display**
+- [x] Social tab with community impact and live feed features - **ENHANCED: Real-time updates**
+- [x] Cross-tab data synchronization and HTML ID conflict resolution
 
 ### 🔄 Placeholder/Limited Implementation
 - [ ] **Challenges Tab:** Basic structure present, content shows "coming soon"
@@ -327,6 +372,6 @@ CarbonSense is a fully-functional web application for carbon footprint tracking 
 
 ---
 
-*Last Updated: October 14, 2025*
-*Version: 1.0 MVP*
-*Status: Production Ready*
+*Last Updated: October 15, 2025*
+*Version: 1.1 MVP (Critical Bug Fixes Applied)*
+*Status: Production Ready - Enhanced Stability*
