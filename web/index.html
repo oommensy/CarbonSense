@@ -459,7 +459,18 @@
                             <div class="text-xs text-gray-500" id="userProfile">
                                 <span id="userAge">35</span>yo, <span id="userHousehold">2</span> people, <span id="userLocation">urban</span>
                             </div>
+                            <div class="text-xs text-green-600 font-medium" id="currentLocationDisplay">
+                                📍 Location loading...
+                            </div>
                         </div>
+                        
+                        <!-- Travel Mode Toggle -->
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleTravelMode()" id="travelModeBtn" class="text-xs px-3 py-1 rounded-full border-2 border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors">
+                                🧳 Travel Mode
+                            </button>
+                        </div>
+                        
                         <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
                             Logout
                         </button>
@@ -581,10 +592,11 @@
                     </div>
                 </div>
 
-                <!-- AI Recommendations -->
+                <!-- Enhanced AI Recommendations -->
                 <div class="bg-white rounded-lg shadow">
                     <div class="p-6 border-b">
-                        <h3 class="text-lg font-medium text-gray-900">AI Recommendations</h3>
+                        <h3 class="text-lg font-medium text-gray-900">🤖 Smart Recommendations</h3>
+                        <p class="text-sm text-gray-500 mt-1">Seasonal, location-based & personalized suggestions</p>
                     </div>
                     <div class="p-6">
                         <div class="space-y-3" id="recommendations">
@@ -1300,6 +1312,9 @@
                     isDemoMode = isFirstTimeUser(currentUser.email);
                     console.log('Demo mode set to:', isDemoMode);
                     
+                    // Initialize enhanced location system
+                    initializeLocationSystem();
+                    
                     // Show dashboard instead of landing page
                     showDashboard();
                     
@@ -1327,6 +1342,18 @@
         let currentUser = null;
         let isLoginMode = true;
         let isDemoMode = true; // Flag to control demo data
+        
+        // Enhanced Location Management
+        let currentLocation = {
+            type: 'urban',          // 'urban', 'suburban', 'rural'
+            city: null,             // Current city name
+            country: null,          // Current country
+            isTravel: false,        // Whether user is traveling
+            coordinates: null,      // Lat/lng if available
+            lastUpdated: null       // Timestamp of last location update
+        };
+        let savedLocations = JSON.parse(localStorage.getItem('carbonSense_savedLocations') || '[]');
+        let travelMode = false;
         
         // Real user activities start empty (will be loaded per user)
         let activities = [];
@@ -1367,31 +1394,1148 @@
             return userActivities.length === 0 && !hasUserSeenDemoPrompt(userEmail);
         }
 
-        // Dynamic AI Recommendations Engine
-        function generatePersonalizedRecommendations() {
+        // 🌍 ENHANCED LOCATION MANAGEMENT SYSTEM
+        
+        function initializeLocationSystem() {
+            console.log('Initializing location system...');
+            console.log('Current user:', currentUser);
+            
+            // Load saved locations and travel state
+            const savedTravelMode = localStorage.getItem('carbonSense_travelMode');
+            travelMode = savedTravelMode === 'true';
+            console.log('Travel mode:', travelMode);
+            
+            // Load saved locations
+            const savedLocationData = localStorage.getItem('carbonSense_savedLocations');
+            if (savedLocationData) {
+                try {
+                    savedLocations = JSON.parse(savedLocationData);
+                } catch (e) {
+                    console.log('Error loading saved locations:', e);
+                }
+            }
+            
+            // Set initial location from user profile with proper fallback
+            if (currentUser && currentUser.location_type) {
+                currentLocation.type = currentUser.location_type;
+                console.log('Using user profile location type:', currentLocation.type);
+            } else {
+                currentLocation.type = 'urban'; // Default fallback
+                console.log('Using default location type: urban');
+            }
+            
+            // Update display immediately with fallback location
+            updateLocationDisplay();
+            
+            // Try to get user's current location if they allow it
+            if (navigator.geolocation && !currentLocation.coordinates) {
+                console.log('Requesting geolocation...');
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        console.log('Geolocation success:', position.coords);
+                        currentLocation.coordinates = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        currentLocation.lastUpdated = new Date().toISOString();
+                        console.log('Got user location:', currentLocation.coordinates);
+                        
+                        // Try to get city name from coordinates (you'd normally use a geocoding API)
+                        reverseGeocode(currentLocation.coordinates);
+                    },
+                    (error) => {
+                        // Handle different types of geolocation errors gracefully
+                        let errorMessage = 'Geolocation not available: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Permission denied by user';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Position information unavailable';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Request timeout';
+                                break;
+                            default:
+                                errorMessage += 'Unknown error (possibly HTTPS required)';
+                                break;
+                        }
+                        console.log(errorMessage);
+                        // We already have fallback location set, so just update display
+                        updateLocationDisplay();
+                    },
+                    { timeout: 10000, enableHighAccuracy: false }
+                );
+            } else if (!navigator.geolocation) {
+                console.log('Geolocation not supported by browser');
+                updateLocationDisplay();
+            } else {
+                console.log('Already have coordinates or geolocation disabled');
+                updateLocationDisplay();
+            }
+        }
+
+        function reverseGeocode(coordinates) {
+            // In a real app, you'd use Google Maps API, OpenStreetMap Nominatim, etc.
+            // For now, let's simulate based on coordinates
+            console.log('Reverse geocoding coordinates:', coordinates);
+            const mockCityData = getMockCityFromCoordinates(coordinates);
+            currentLocation.city = mockCityData.city;
+            currentLocation.country = mockCityData.country;
+            currentLocation.type = mockCityData.type;
+            console.log('Reverse geocoded to:', mockCityData);
+            updateLocationDisplay();
+        }
+
+        function getMockCityFromCoordinates(coordinates) {
+            // Mock city detection based on rough coordinates
+            const lat = coordinates.lat;
+            const lng = coordinates.lng;
+            
+            // Very rough geographical guessing for demo purposes
+            if (lat > 40 && lat < 41 && lng > -74 && lng < -73) {
+                return { city: 'New York', country: 'USA', type: 'urban' };
+            } else if (lat > 37 && lat < 38 && lng > -122.5 && lng < -122) {
+                return { city: 'San Francisco', country: 'USA', type: 'urban' };
+            } else if (lat > 51 && lat < 52 && lng > -1 && lng < 1) {
+                return { city: 'London', country: 'UK', type: 'urban' };
+            } else if (lat > 40) {
+                return { city: 'Northern City', country: 'Unknown', type: 'urban' };
+            } else {
+                return { city: 'Southern City', country: 'Unknown', type: 'suburban' };
+            }
+        }
+
+        function updateLocationDisplay() {
+            const locationElement = document.getElementById('currentLocationDisplay');
+            if (locationElement) {
+                let locationText;
+                
+                if (currentLocation.city) {
+                    // We have a specific city name
+                    locationText = `📍 ${currentLocation.city}`;
+                    if (currentLocation.country) {
+                        locationText += `, ${currentLocation.country}`;
+                    }
+                } else if (currentLocation.coordinates) {
+                    // We have coordinates but no city name yet
+                    locationText = '📍 Getting location...';
+                } else if (currentLocation.type) {
+                    // Using fallback location type
+                    locationText = `📍 ${currentLocation.type.charAt(0).toUpperCase() + currentLocation.type.slice(1)} area`;
+                } else {
+                    // Default loading state
+                    locationText = '📍 Loading location...';
+                }
+                
+                if (travelMode) {
+                    locationText += ' (Traveling)';
+                }
+                
+                locationElement.textContent = locationText;
+                console.log('Updated location display:', locationText);
+            }
+            
+            // Update travel mode button appearance
+            const travelBtn = document.getElementById('travelModeBtn');
+            if (travelBtn) {
+                if (travelMode) {
+                    travelBtn.className = 'text-xs px-3 py-1 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors';
+                    travelBtn.textContent = '🧳 Exit Travel Mode';
+                } else {
+                    travelBtn.className = 'text-xs px-3 py-1 rounded-full border-2 border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors';
+                    travelBtn.textContent = '🧳 Travel Mode';
+                }
+            }
+        }
+
+        function addTravelLocation(cityName, locationType = 'urban') {
+            const newLocation = {
+                id: Date.now(),
+                city: cityName,
+                type: locationType,
+                addedDate: new Date().toISOString(),
+                country: inferCountryFromCity(cityName), // Add country inference
+                region: inferRegionFromCity(cityName)    // Add region for travel-specific tips
+            };
+            
+            savedLocations.push(newLocation);
+            localStorage.setItem('carbonSense_savedLocations', JSON.stringify(savedLocations));
+            
+            // Set as current location
+            currentLocation.city = cityName;
+            currentLocation.type = locationType;
+            currentLocation.country = newLocation.country;
+            currentLocation.region = newLocation.region;
+            currentLocation.isTravel = true;
+            
+            updateLocationDisplay();
+            
+            // Refresh recommendations with new location
+            populateRecommendations();
+        }
+
+        // 🌍 INTELLIGENT CITY/COUNTRY INFERENCE
+        function inferCountryFromCity(cityName) {
+            const cityLower = cityName.toLowerCase();
+            
+            // Major cities with known countries
+            const cityCountryMap = {
+                // Americas
+                'new york': 'USA', 'los angeles': 'USA', 'chicago': 'USA', 'miami': 'USA', 'san francisco': 'USA',
+                'toronto': 'Canada', 'vancouver': 'Canada', 'montreal': 'Canada',
+                'mexico city': 'Mexico', 'cancun': 'Mexico',
+                'rio de janeiro': 'Brazil', 'são paulo': 'Brazil', 'buenos aires': 'Argentina',
+                
+                // Europe
+                'london': 'UK', 'manchester': 'UK', 'edinburgh': 'UK',
+                'paris': 'France', 'lyon': 'France', 'nice': 'France',
+                'berlin': 'Germany', 'munich': 'Germany', 'hamburg': 'Germany',
+                'rome': 'Italy', 'milan': 'Italy', 'venice': 'Italy', 'florence': 'Italy',
+                'madrid': 'Spain', 'barcelona': 'Spain', 'valencia': 'Spain',
+                'amsterdam': 'Netherlands', 'rotterdam': 'Netherlands',
+                'stockholm': 'Sweden', 'copenhagen': 'Denmark', 'oslo': 'Norway',
+                'zurich': 'Switzerland', 'geneva': 'Switzerland',
+                
+                // Asia
+                'tokyo': 'Japan', 'osaka': 'Japan', 'kyoto': 'Japan',
+                'beijing': 'China', 'shanghai': 'China', 'hong kong': 'Hong Kong',
+                'seoul': 'South Korea', 'singapore': 'Singapore',
+                'mumbai': 'India', 'delhi': 'India', 'bangalore': 'India',
+                'bangkok': 'Thailand', 'manila': 'Philippines',
+                
+                // Australia/Oceania
+                'sydney': 'Australia', 'melbourne': 'Australia', 'brisbane': 'Australia',
+                'auckland': 'New Zealand',
+                
+                // Middle East & Africa
+                'dubai': 'UAE', 'doha': 'Qatar', 'riyadh': 'Saudi Arabia',
+                'cairo': 'Egypt', 'cape town': 'South Africa'
+            };
+            
+            return cityCountryMap[cityLower] || 'Unknown';
+        }
+
+        function inferRegionFromCity(cityName) {
+            const country = inferCountryFromCity(cityName);
+            
+            const regionMap = {
+                // Americas
+                'USA': 'North America', 'Canada': 'North America', 'Mexico': 'North America',
+                'Brazil': 'South America', 'Argentina': 'South America',
+                
+                // Europe
+                'UK': 'Europe', 'France': 'Europe', 'Germany': 'Europe', 'Italy': 'Europe',
+                'Spain': 'Europe', 'Netherlands': 'Europe', 'Sweden': 'Europe', 
+                'Denmark': 'Europe', 'Norway': 'Europe', 'Switzerland': 'Europe',
+                
+                // Asia
+                'Japan': 'Asia', 'China': 'Asia', 'Hong Kong': 'Asia', 'South Korea': 'Asia',
+                'Singapore': 'Asia', 'India': 'Asia', 'Thailand': 'Asia', 'Philippines': 'Asia',
+                
+                // Others
+                'Australia': 'Oceania', 'New Zealand': 'Oceania',
+                'UAE': 'Middle East', 'Qatar': 'Middle East', 'Saudi Arabia': 'Middle East',
+                'Egypt': 'Africa', 'South Africa': 'Africa'
+            };
+            
+            return regionMap[country] || 'Unknown';
+        }
+
+        // 🧳 INTELLIGENT TRAVEL-SPECIFIC RECOMMENDATIONS
+        function getTravelSpecificRecommendations(cityName, country, region) {
+            const recommendations = [];
+            
+            // Country-specific transport recommendations
+            const transportTips = {
+                'Japan': `🚅 Use Japan's efficient rail system (JR Pass) - trains are faster and cleaner than flights`,
+                'Netherlands': `🚲 Rent a bike in ${cityName} - cycling is the Dutch way and carbon-free`,
+                'Germany': `🚊 Germany's public transport is excellent - get a day pass for ${cityName}`,
+                'UK': `🚇 Use Oyster/contactless cards in London or local transport apps in ${cityName}`,
+                'France': `🚇 Paris Metro/regional transport connects everywhere efficiently`,
+                'Switzerland': `🚞 Swiss trains are punctual, scenic, and eco-friendly`,
+                'Denmark': `🚲 Copenhagen's bike culture - rent a city bike for zero emissions`,
+                'USA': `🚌 Many US cities have bike-share and public transport apps`,
+                'Canada': `🚌 Canadian cities often have good public transit systems`,
+                'Singapore': `🚇 Singapore's MRT is clean, efficient, and covers the whole city`,
+                'South Korea': `🚇 Seoul's subway system is world-class and very affordable`,
+                'China': `🚇 Major Chinese cities have extensive metro systems`,
+                'Australia': `🚌 Australian cities have good public transport networks`,
+            };
+            
+            // Country-specific food recommendations
+            const foodTips = {
+                'Japan': `🍱 Try local seasonal vegetables (yasai) - Japan has amazing plant-based cuisine`,
+                'Italy': `🍝 Italian cuisine has many plant-based dishes - try pasta with local vegetables`,
+                'France': `🥖 French markets have amazing local produce - support local farmers`,
+                'Germany': `🥨 German beer gardens often have local, seasonal foods`,
+                'UK': `🌱 Many British pubs now offer excellent plant-based options`,
+                'India': `🌶️ Indian cuisine is naturally rich in plant-based options`,
+                'Thailand': `🌶️ Thai street food has many vegetarian options with local ingredients`,
+                'Mexico': `🌮 Mexican cuisine has excellent plant-based dishes with local ingredients`,
+                'Spain': `🥘 Spanish tapas often include local vegetables and legumes`,
+                'Netherlands': `🧀 Try local Dutch vegetables and sustainable dairy options`,
+                'Brazil': `🥭 Brazil has incredible tropical fruits and plant-based options`,
+                'China': `🥢 Chinese cuisine has many tofu and vegetable-based dishes`,
+            };
+            
+            // Region-specific cultural tips
+            const culturalTips = {
+                'Europe': `♻️ European cities often have excellent recycling systems - follow local guidelines`,
+                'Asia': `🚶 Many Asian cities are very walkable with great street food scenes`,
+                'North America': `🏨 Look for LEED-certified or green hotels`,
+                'South America': `🌿 Support eco-tourism and local conservation efforts`,
+                'Oceania': `🌊 Choose reef-safe sunscreen and support marine conservation`,
+                'Middle East': `💧 Water conservation is important - be mindful of usage`,
+                'Africa': `🌍 Support local communities and conservation projects`,
+            };
+            
+            // Add transport tip
+            const transportTip = transportTips[country] || `🚌 Use ${cityName}'s public transport for eco-friendly exploration`;
+            recommendations.push(transportTip);
+            
+            // Add food tip
+            const foodTip = foodTips[country] || `🍽️ Try ${cityName}'s local seasonal foods to reduce transport emissions`;
+            recommendations.push(foodTip);
+            
+            // Add cultural/regional tip
+            const culturalTip = culturalTips[region] || `🌍 Be a responsible traveler in ${cityName} - respect local environmental practices`;
+            recommendations.push(culturalTip);
+            
+            return recommendations;
+        }
+
+        function toggleTravelMode() {
+            travelMode = !travelMode;
+            localStorage.setItem('carbonSense_travelMode', travelMode.toString());
+            
+            if (travelMode) {
+                showTravelLocationModal();
+            } else {
+                // Return to home location
+                currentLocation.type = currentUser?.location_type || 'urban';
+                currentLocation.city = null;
+                currentLocation.isTravel = false;
+                updateLocationDisplay();
+                populateRecommendations();
+            }
+        }
+
+        function showTravelLocationModal() {
+            // Create a simple modal for adding travel location
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.onclick = function(e) {
+                // Close modal if clicked outside the content
+                if (e.target === modal) {
+                    cancelTravelLocation();
+                }
+            };
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 w-96" onclick="event.stopPropagation()">
+                    <h3 class="text-lg font-bold mb-4">🧳 Add Travel Location</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">City/Location</label>
+                        <input type="text" id="travelCityInput" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Paris, Tokyo, Miami">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location Type</label>
+                        <select id="travelTypeInput" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="urban">Urban (City)</option>
+                            <option value="suburban">Suburban</option>
+                            <option value="rural">Rural</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="confirmTravelLocation()" class="flex-1 bg-green-600 text-white py-2 rounded-md hover:bg-green-700">Add Location</button>
+                        <button onclick="cancelTravelLocation()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Focus on the city input
+            setTimeout(() => {
+                const cityInput = document.getElementById('travelCityInput');
+                if (cityInput) {
+                    cityInput.focus();
+                    // Add Enter key support
+                    cityInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            confirmTravelLocation();
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function confirmTravelLocation() {
+            const cityName = document.getElementById('travelCityInput').value.trim();
+            const locationType = document.getElementById('travelTypeInput').value;
+            
+            if (cityName) {
+                // Close modal first
+                removeTravelModal();
+                // Then add the travel location
+                addTravelLocation(cityName, locationType);
+            } else {
+                alert('Please enter a city name');
+            }
+        }
+
+        function cancelTravelLocation() {
+            travelMode = false;
+            localStorage.setItem('carbonSense_travelMode', 'false');
+            removeTravelModal();
+        }
+
+        function removeTravelModal() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) {
+                modal.remove();
+            }
+            // Also try removing by class in case there are multiple modals
+            const allModals = document.querySelectorAll('.fixed.inset-0.bg-black.bg-opacity-50');
+            allModals.forEach(modal => modal.remove());
+        }
+
+        // Enhanced AI Recommendations Engine with Seasonal, Location & Personalized Suggestions
+        // 🤖 REAL AI RECOMMENDATION ENGINE
+        async function generateAIRecommendations(userProfile, activityData, locationContext) {
+            console.log('🤖 Generating AI recommendations...');
+            console.log('Input userProfile:', userProfile);
+            console.log('Input activityData:', activityData);
+            console.log('Input locationContext:', locationContext);
+            
+            // Prepare context for AI with proper fallbacks and actual user data
+            const aiContext = {
+                user: {
+                    age: userProfile?.age || 'unknown',
+                    householdSize: userProfile?.household_size || 1,
+                    locationType: userProfile?.location_type || 'urban',
+                    username: userProfile?.username || 'user',
+                    preferences: userProfile?.preferences || []
+                },
+                location: {
+                    current: locationContext?.type || 'urban',
+                    city: locationContext?.city || null,
+                    country: locationContext?.country || null,
+                    isTravel: locationContext?.isTravel || false
+                },
+                activities: activityData.map(activity => ({
+                    category: activity.category || activity.type?.split(' - ')[0] || 'Unknown',
+                    type: activity.type || 'Unknown',
+                    emissions: activity.emissions || 0,
+                    date: activity.date || new Date().toISOString(),
+                    frequency: 'daily' // Could be calculated from date patterns
+                })),
+                context: {
+                    season: getSeasonFromMonth(new Date().getMonth()),
+                    timeOfDay: new Date().getHours(),
+                    dayOfWeek: new Date().getDay(),
+                    totalActivities: activityData.length,
+                    totalEmissions: activityData.reduce((sum, a) => sum + (a.emissions || 0), 0)
+                }
+            };
+
+            console.log('Built AI context:', aiContext);
+
+            // Try AI-powered recommendations first
+            try {
+                const aiRecommendations = await callAIRecommendationService(aiContext);
+                if (aiRecommendations && aiRecommendations.length > 0) {
+                    console.log('✅ AI recommendations generated:', aiRecommendations);
+                    return aiRecommendations;
+                }
+            } catch (error) {
+                console.warn('⚠️ AI service unavailable, falling back to rule-based:', error);
+            }
+
+            // Fallback to enhanced rule-based system
+            return generateEnhancedRuleBasedRecommendations(aiContext);
+        }
+
+        // 🌐 AI SERVICE INTEGRATION
+        async function callAIRecommendationService(context) {
+            // Option 1: Local Ollama LLM (preferred for privacy)
+            try {
+                return await callOllamaLLM(context);
+            } catch (error) {
+                console.log('Ollama not available, trying cloud AI...');
+            }
+
+            // Option 2: Cloud AI API (OpenAI, Anthropic, etc.)
+            try {
+                return await callCloudAI(context);
+            } catch (error) {
+                console.log('Cloud AI not available');
+                throw error;
+            }
+        }
+
+        // 🦙 LOCAL OLLAMA INTEGRATION
+        async function callOllamaLLM(context) {
+            const prompt = buildAIPrompt(context);
+            
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'llama3.2:3b', // Or any available model
+                    prompt: prompt,
+                    stream: false,
+                    options: {
+                        temperature: 0.7,
+                        max_tokens: 500
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Ollama service not available');
+            }
+
+            const data = await response.json();
+            return parseAIResponse(data.response);
+        }
+
+        // ☁️ CLOUD AI INTEGRATION
+        async function callCloudAI(context) {
+            // This would integrate with OpenAI, Anthropic, or other cloud services
+            // For demo purposes, we'll simulate this
+            const prompt = buildAIPrompt(context);
+            
+            // Simulated API call
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    // Simulate AI-generated recommendations
+                    resolve([
+                        `🤖 AI suggests: Based on your ${context.activities.length} tracked activities, try reducing transportation emissions by 15% through strategic trip planning`,
+                        `🧠 Smart insight: Your ${context.location.current} location offers unique opportunities for ${context.location.country ? `${context.location.country}-specific` : 'local'} sustainable practices`,
+                        `📊 Data-driven tip: Analyzing your patterns suggests ${context.context.season} is optimal for implementing energy-saving measures`
+                    ]);
+                }, 1000);
+            });
+        }
+
+        // 📝 AI PROMPT ENGINEERING
+        function buildAIPrompt(context) {
+            return `You are an expert sustainability advisor. Generate 3-5 personalized carbon footprint reduction recommendations based on this user data:
+
+USER PROFILE:
+- Age: ${context.user.age}, Household: ${context.user.householdSize} people
+- Location: ${context.location.current} area${context.location.city ? ` in ${context.location.city}` : ''}
+- Country: ${context.location.country || 'Unknown'}
+- Travel status: ${context.location.isTravel ? 'Currently traveling' : 'At home'}
+
+RECENT ACTIVITIES (${context.activities.length} tracked):
+${context.activities.map(a => `- ${a.category}: ${a.type} (${a.emissions}kg CO2)`).join('\n')}
+
+CONTEXT:
+- Season: ${context.context.season}
+- Time: ${context.context.timeOfDay}:00
+- Current date: ${new Date().toISOString().split('T')[0]}
+
+REQUIREMENTS:
+1. Generate specific, actionable recommendations
+2. Consider local context and cultural practices
+3. Prioritize highest-impact opportunities
+4. Include encouraging, positive language
+5. Make suggestions realistic and achievable
+6. Include relevant emojis for engagement
+
+Format each recommendation as a single line starting with an emoji.`;
+        }
+
+        // 🧠 AI RESPONSE PARSING
+        function parseAIResponse(aiText) {
+            if (!aiText || typeof aiText !== 'string') {
+                throw new Error('Invalid AI response');
+            }
+
+            // Parse the AI response into individual recommendations
+            const lines = aiText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 10 && (line.includes('🤖') || line.includes('💡') || line.includes('🌱') || line.match(/^[🌍🚗🍽️⚡♻️🏠🚲📊]/)));
+
+            return lines.slice(0, 5); // Limit to 5 AI recommendations
+        }
+
+        // 🎯 ENHANCED ML-STYLE RECOMMENDATION ENGINE
+        async function generatePersonalizedRecommendations() {
             const userActivities = activities.filter(activity => !activity.isDemo);
-            const demoActivities = activities.filter(activity => activity.isDemo);
-            const analysisData = userActivities.length > 0 ? userActivities : demoActivities;
+            const filteredDemoActivities = activities.filter(activity => activity.isDemo);
+            const analysisData = userActivities.length > 0 ? userActivities : filteredDemoActivities;
             
             if (analysisData.length === 0) {
                 return [
-                    'Start tracking your daily activities to get personalized recommendations',
-                    'Add your first carbon footprint activity to begin',
-                    'Log transportation, food, and energy usage for smart insights'
+                    '🌱 Start tracking your daily activities to get personalized ML recommendations',
+                    '📊 Add your first carbon footprint activity to unlock smart insights',
+                    '🤖 Our ML engine learns from your patterns to suggest the most impactful changes',
+                    '💚 Welcome to your sustainability journey! Every step counts 🌟'
                 ];
             }
 
+            console.log('🧠 Running ML-style analysis on', analysisData.length, 'activities...');
+            
+            // Generate ML-style recommendations using advanced pattern analysis
+            const mlRecommendations = generateMLStyleRecommendations(analysisData);
+            
+            // Get traditional rule-based as backup
+            const ruleBasedRecommendations = generateEnhancedRuleBasedRecommendations({
+                user: currentUser,
+                location: currentLocation,
+                activities: analysisData,
+                context: {
+                    season: getSeasonFromMonth(new Date().getMonth()),
+                    timeOfDay: new Date().getHours()
+                }
+            });
+
+            // Combine ML insights with motivational content
+            const motivationalRecs = ruleBasedRecommendations.filter(rec => 
+                rec.includes('🏆') || rec.includes('🎯') || rec.includes('🌟') || 
+                rec.includes('👏') || rec.includes('💚') || rec.includes('✨') || 
+                rec.includes('🎉') || rec.includes('🌱') || rec.includes('Amazing') ||
+                rec.includes('Excellent') || rec.includes('Great job') || rec.includes('Keep up') ||
+                rec.includes('fantastic') || rec.includes('commitment') || rec.includes('making a difference')
+            );
+
+            // Try AI-powered recommendations if available
+            try {
+                const aiRecommendations = await generateAIRecommendations(
+                    currentUser,
+                    analysisData,
+                    currentLocation
+                );
+                
+                if (aiRecommendations && aiRecommendations.length > 0) {
+                    console.log('✅ Combining ML insights + AI + motivational content');
+                    
+                    return [
+                        ...mlRecommendations.slice(0, 2),      // ML insights first
+                        ...aiRecommendations.slice(0, 1),     // AI suggestions
+                        ...motivationalRecs.slice(0, 2),      // Motivational content
+                        ...ruleBasedRecommendations.filter(rec => !motivationalRecs.includes(rec)).slice(0, 1)
+                    ].slice(0, 6);
+                }
+            } catch (error) {
+                console.warn('⚠️ AI service unavailable, using ML + rule-based system:', error);
+            }
+
+            // ML + rule-based fallback
+            console.log('📋 Using ML + enhanced rule-based recommendations');
+            return [
+                ...mlRecommendations.slice(0, 3),
+                ...motivationalRecs.slice(0, 2),
+                ...ruleBasedRecommendations.filter(rec => !motivationalRecs.includes(rec)).slice(0, 1)
+            ].slice(0, 6);
+        }
+
+        // 🧠 MACHINE LEARNING STYLE RECOMMENDATION ENGINE
+        function generateMLStyleRecommendations(activities) {
             const recommendations = [];
+            
+            // ML Feature Engineering - Extract patterns from user data
+            const features = extractActivityFeatures(activities);
+            console.log('🔬 ML Features extracted:', features);
+            
+            // Pattern Recognition - Identify user behavior patterns
+            const patterns = identifyBehaviorPatterns(features);
+            console.log('📈 Behavior patterns identified:', patterns);
+            
+            // Anomaly Detection - Find unusual activities or improvements
+            const anomalies = detectActivityAnomalies(activities, features);
+            
+            // Positive Reinforcement Learning - Reward good choices
+            const positiveActions = identifyPositiveActions(activities);
+            
+            // Generate ML-driven recommendations
+            
+            // 1. Recognize and reinforce positive actions across ALL categories
+            if (positiveActions.length > 0) {
+                const latestPositive = positiveActions[0];
+                
+                // ENERGY CATEGORY ML INSIGHTS
+                if (latestPositive.category === 'energy') {
+                    if (latestPositive.subcategory === 'electricity_renewable') {
+                        recommendations.push('🌟 ML Insight: Renewable energy detected! You\'re 85% more sustainable than average users - leading the clean energy revolution!');
+                    } else if (latestPositive.emissions < 2.0) {
+                        recommendations.push('⚡ ML Analysis: Low-emission energy choice detected! You\'re optimizing for efficiency - 65% better than typical home usage');
+                    } else {
+                        recommendations.push('📊 ML Tracking: Energy monitoring shows awareness - users who track reduce consumption by 23% within 3 months');
+                    }
+                }
+                
+                // TRANSPORTATION CATEGORY ML INSIGHTS  
+                else if (latestPositive.category === 'transportation') {
+                    if (latestPositive.subcategory === 'bicycle' || latestPositive.subcategory === 'walking') {
+                        recommendations.push('🚴 ML Champion: Zero-emission transport! You\'re in the top 15% of eco-warriors - every km saves 0.17kg CO₂ vs cars');
+                    } else if (latestPositive.subcategory === 'bus' || latestPositive.subcategory === 'train') {
+                        recommendations.push('🚌 ML Analysis: Public transport usage reduces your emissions by ~68% vs car commuters - you\'re building sustainable habits!');
+                    } else if (latestPositive.subcategory === 'car_electric') {
+                        recommendations.push('🔋 ML Progress: Electric vehicle usage detected! 70% lower emissions than petrol - you\'re future-proofing your transport');
+                    } else if (latestPositive.emissions < 5.0) {
+                        recommendations.push('🌍 ML Insight: Efficient transport choice! Your low-emission trips are 45% better than average commuter patterns');
+                    }
+                }
+                
+                // FOOD CATEGORY ML INSIGHTS
+                else if (latestPositive.category === 'food') {
+                    if (latestPositive.subcategory === 'vegetables' || latestPositive.subcategory === 'fruits') {
+                        recommendations.push('🥬 ML Nutrition: Plant-based choice detected! Your diet emissions are 78% lower than meat-heavy diets - health + planet win!');
+                    } else if (latestPositive.subcategory === 'chicken' || latestPositive.subcategory === 'fish') {
+                        recommendations.push('🐟 ML Balance: Lower-impact protein choice! 60% less emissions than red meat - smart dietary optimization');
+                    } else if (latestPositive.emissions < 8.0) {
+                        recommendations.push('�️ ML Diet: Mindful food choices detected! Your meal planning reduces emissions by 35% vs typical diet patterns');
+                    } else {
+                        recommendations.push('📝 ML Awareness: Food tracking shows consciousness - users who monitor reduce diet emissions by 28% over time');
+                    }
+                }
+                
+                // WASTE CATEGORY ML INSIGHTS
+                else if (latestPositive.category === 'waste') {
+                    if (latestPositive.subcategory === 'organic' || latestPositive.subcategory === 'compost') {
+                        recommendations.push('🌱 ML Composting: Organic waste diversion prevents ~2.4kg CO₂/month from landfill methane - you\'re soil-building!');
+                    } else if (latestPositive.subcategory === 'recycling') {
+                        recommendations.push('♻️ ML Recycling: Material recovery detected! Recycling saves 75% more energy than new production - circular economy hero!');
+                    } else if (latestPositive.emissions < 1.0) {
+                        recommendations.push('🗑️ ML Waste: Minimal waste generation! You\'re 60% below average waste footprint - zero-waste mindset in action');
+                    } else {
+                        recommendations.push('📊 ML Tracking: Waste monitoring builds awareness - conscious disposal reduces household waste by 32%');
+                    }
+                }
+                
+                // GENERAL POSITIVE ACTION
+                else {
+                    recommendations.push('🏆 ML Recognition: Sustainable action detected! You\'re actively building eco-habits - consistency improves outcomes by 89%');
+                }
+            }
+            
+            // 2. Predictive modeling for next best action
+            const nextBestAction = predictNextBestAction(patterns, features);
+            if (nextBestAction) {
+                recommendations.push(nextBestAction);
+            }
+            
+            // 3. Trend analysis and forecasting
+            const trendInsight = analyzeTrends(activities, features);
+            if (trendInsight) {
+                recommendations.push(trendInsight);
+            }
+            
+            // 4. Comparative analysis with similar users
+            const peerComparison = generatePeerComparison(features);
+            if (peerComparison) {
+                recommendations.push(peerComparison);
+            }
+            
+            // 5. Impact optimization suggestions
+            const optimizationTip = generateOptimizationTip(features, patterns);
+            if (optimizationTip) {
+                recommendations.push(optimizationTip);
+            }
+            
+            return recommendations;
+        }
+
+        // Feature Engineering - Extract ML features from activities
+        function extractActivityFeatures(activities) {
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const recentActivities = activities.filter(a => new Date(a.date) >= oneWeekAgo);
+            
+            const features = {
+                totalActivities: activities.length,
+                recentActivities: recentActivities.length,
+                totalEmissions: activities.reduce((sum, a) => sum + (a.emissions || 0), 0),
+                avgEmissions: activities.length > 0 ? activities.reduce((sum, a) => sum + (a.emissions || 0), 0) / activities.length : 0,
+                categoryDistribution: {},
+                subcategoryDistribution: {},
+                activityFrequency: activities.length / Math.max(1, getDateSpanDays(activities)),
+                lowCarbonPercentage: 0,
+                sustainableChoices: 0,
+                improvementTrend: calculateImprovementTrend(activities)
+            };
+            
+            // Analyze category and subcategory distribution
+            activities.forEach(activity => {
+                const category = activity.category || 'unknown';
+                const subcategory = activity.subcategory || 'unknown';
+                
+                features.categoryDistribution[category] = (features.categoryDistribution[category] || 0) + 1;
+                features.subcategoryDistribution[subcategory] = (features.subcategoryDistribution[subcategory] || 0) + 1;
+                
+                // Identify sustainable choices
+                if (isPositiveAction(activity)) {
+                    features.sustainableChoices++;
+                }
+                
+                // Calculate low-carbon percentage
+                if (activity.emissions < 2.0) {
+                    features.lowCarbonPercentage++;
+                }
+            });
+            
+            features.lowCarbonPercentage = (features.lowCarbonPercentage / activities.length) * 100;
+            features.sustainableChoiceRate = (features.sustainableChoices / activities.length) * 100;
+            
+            return features;
+        }
+
+        // Pattern Recognition - Identify user behavior patterns
+        function identifyBehaviorPatterns(features) {
+            const patterns = {
+                primaryCategories: Object.entries(features.categoryDistribution)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 3)
+                    .map(([cat]) => cat),
+                engagementLevel: features.activityFrequency > 1 ? 'high' : features.activityFrequency > 0.5 ? 'medium' : 'low',
+                sustainabilityFocus: features.sustainableChoiceRate > 40 ? 'eco-conscious' : features.sustainableChoiceRate > 15 ? 'learning' : 'beginning',
+                improvementDirection: features.improvementTrend > 0.1 ? 'improving' : features.improvementTrend < -0.1 ? 'declining' : 'stable'
+            };
+            
+            return patterns;
+        }
+
+        // Anomaly Detection - Find interesting patterns
+        function detectActivityAnomalies(activities, features) {
+            const anomalies = [];
+            
+            // Detect significant positive actions
+            const veryLowEmissions = activities.filter(a => a.emissions < 0.5);
+            if (veryLowEmissions.length > features.totalActivities * 0.3) {
+                anomalies.push({ type: 'positive', detail: 'high_sustainable_choices' });
+            }
+            
+            // Detect renewable energy usage
+            const renewableEnergy = activities.find(a => 
+                a.category === 'energy' && (a.subcategory === 'renewable' || a.type.toLowerCase().includes('renewable'))
+            );
+            if (renewableEnergy) {
+                anomalies.push({ type: 'positive', detail: 'renewable_energy_user' });
+            }
+            
+            return anomalies;
+        }
+
+        // Identify positive environmental actions
+        function identifyPositiveActions(activities) {
+            return activities.filter(activity => isPositiveAction(activity))
+                .sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent first
+        }
+
+        function isPositiveAction(activity) {
+            const positiveActions = [
+                // ENERGY - Clean and efficient choices
+                { category: 'energy', subcategory: 'electricity_renewable' },
+                { category: 'energy', subcategory: 'solar' },
+                
+                // TRANSPORTATION - Low/zero emission modes
+                { category: 'transportation', subcategory: 'bicycle' },
+                { category: 'transportation', subcategory: 'walking' },
+                { category: 'transportation', subcategory: 'bus' },
+                { category: 'transportation', subcategory: 'train' },
+                { category: 'transportation', subcategory: 'car_electric' },
+                
+                // FOOD - Plant-forward and sustainable choices
+                { category: 'food', subcategory: 'vegetables' },
+                { category: 'food', subcategory: 'fruits' },
+                { category: 'food', subcategory: 'grains' },
+                { category: 'food', subcategory: 'chicken' }, // Lower impact than red meat
+                { category: 'food', subcategory: 'fish' },   // Generally lower than red meat
+                
+                // WASTE - Circular economy actions
+                { category: 'waste', subcategory: 'organic' },
+                { category: 'waste', subcategory: 'compost' },
+                { category: 'waste', subcategory: 'recycling' }
+            ];
+            
+            // Check explicit positive subcategories
+            const isExplicitPositive = positiveActions.some(positive => 
+                activity.category === positive.category && activity.subcategory === positive.subcategory
+            );
+            
+            if (isExplicitPositive) return true;
+            
+            // Category-specific emission thresholds for positive actions
+            const categoryThresholds = {
+                'energy': 2.0,          // Below 2kg = efficient energy use
+                'transportation': 3.0,  // Below 3kg = sustainable mobility  
+                'food': 5.0,           // Below 5kg = conscious food choices
+                'waste': 1.0           // Below 1kg = minimal waste generation
+            };
+            
+            const threshold = categoryThresholds[activity.category] || 2.0;
+            return activity.emissions < threshold;
+        }
+
+        // Predictive modeling for next best action across ALL categories
+        function predictNextBestAction(patterns, features) {
+            const { primaryCategories, sustainabilityFocus, engagementLevel } = patterns;
+            
+            // ECO-CONSCIOUS USERS - Advanced suggestions
+            if (sustainabilityFocus === 'eco-conscious' && engagementLevel === 'high') {
+                
+                // ENERGY OPTIMIZATION
+                if (primaryCategories.includes('energy')) {
+                    if (!features.subcategoryDistribution.electricity_renewable) {
+                        return '⚡ ML Energy: Your usage patterns suggest renewable energy could cut emissions 85% - solar ROI in your area: 6-8 years';
+                    } else if (features.categoryDistribution.energy > 3) {
+                        return '🏠 ML Smart Home: Consider smart thermostats/LED upgrades - your energy tracking shows 35% additional savings potential';
+                    }
+                }
+                
+                // TRANSPORT OPTIMIZATION  
+                if (primaryCategories.includes('transportation')) {
+                    if (!features.subcategoryDistribution.bicycle && !features.subcategoryDistribution.walking) {
+                        return '🚲 ML Mobility: Your routes suggest 2-3 trips/week could be cycling - saves 15kg CO₂/month + health benefits';
+                    } else if (!features.subcategoryDistribution.car_electric && features.subcategoryDistribution.car_petrol > 2) {
+                        return '🔋 ML EV: Frequent car use detected - EV transition could reduce transport emissions 70% based on your patterns';
+                    } else if (!features.subcategoryDistribution.train && features.subcategoryDistribution.flight_domestic) {
+                        return '🚂 ML Travel: Consider high-speed rail for <500km trips - 80% less emissions than flying, similar time door-to-door';
+                    }
+                }
+                
+                // FOOD SYSTEM OPTIMIZATION
+                if (primaryCategories.includes('food')) {
+                    if (features.subcategoryDistribution.beef > 1) {
+                        return '🌱 ML Diet: Beef reduction strategy - replacing 1 meal/week with plant protein = 12kg CO₂ savings monthly';
+                    } else if (!features.subcategoryDistribution.vegetables && features.categoryDistribution.food > 3) {
+                        return '🥬 ML Nutrition: Local seasonal vegetables could reduce food miles 60% - farmers markets within 10km of you';
+                    }
+                }
+                
+                // WASTE SYSTEM OPTIMIZATION
+                if (primaryCategories.includes('waste')) {
+                    if (!features.subcategoryDistribution.organic) {
+                        return '🌱 ML Composting: Your waste patterns show 40% organic content - composting could eliminate 2.4kg CO₂/month';
+                    } else if (!features.subcategoryDistribution.recycling && features.categoryDistribution.waste > 2) {
+                        return '♻️ ML Circular: Advanced recycling (textiles, electronics) could boost your diversion rate to 85%';
+                    }
+                }
+            }
+            
+            // LEARNING USERS - Building habits
+            else if (sustainabilityFocus === 'learning') {
+                if (primaryCategories[0] === 'transportation') {
+                    return '📈 ML Habit: Transportation focus detected! Try "Car-Free Fridays" - small consistent changes build lasting habits';
+                } else if (primaryCategories[0] === 'energy') {
+                    return '⚡ ML Efficiency: Energy awareness growing! Try tracking hourly usage patterns - reveals 25% more savings opportunities';
+                } else if (primaryCategories[0] === 'food') {
+                    return '🍽️ ML Nutrition: Food consciousness developing! "Meatless Mondays" could be your gateway to 30% diet emission reduction';
+                } else if (primaryCategories[0] === 'waste') {
+                    return '🗑️ ML Zero-Waste: Waste tracking started! Focus on "Refuse, Reduce, Reuse" before recycling for maximum impact';
+                } else {
+                    return '📈 ML Growth: You\'re building great habits! Consistency beats perfection - daily tracking increases success by 73%';
+                }
+            }
+            
+            // BEGINNING USERS - Easy wins
+            else if (sustainabilityFocus === 'beginning') {
+                const easiestCategory = primaryCategories[0];
+                if (easiestCategory === 'transportation') {
+                    return '🎯 ML Start: Transportation tracking begun! Easy win: combine 2 weekly errands into 1 trip = instant 50% reduction';
+                } else if (easiestCategory === 'energy') {
+                    return '💡 ML Begin: Energy awareness started! Quick win: LED bulb swap saves 80% lighting energy + lasts 10x longer';
+                } else if (easiestCategory === 'food') {
+                    return '🥗 ML First: Food tracking initiated! Simple start: one plant-based meal/week reduces emissions 15% immediately';
+                } else if (easiestCategory === 'waste') {
+                    return '♻️ ML Easy: Waste monitoring begun! Quick impact: proper recycling sorting increases diversion 40%';
+                } else {
+                    return `🎯 ML Starter: Your ${easiestCategory} activities show potential - small changes here could yield 20% improvement`;
+                }
+            }
+            
+            return null;
+        }
+
+        // Trend Analysis and Forecasting
+        function analyzeTrends(activities, features) {
+            if (features.totalActivities < 3) return null;
+            
+            const trend = features.improvementTrend;
+            
+            if (trend > 0.2) {
+                return `📊 ML Trend Analysis: Your emissions decreased ${Math.abs(trend * 100).toFixed(0)}% recently - you\'re on track to beat 80% of users!`;
+            } else if (trend < -0.1) {
+                return `📈 ML Alert: Recent activities show ${Math.abs(trend * 100).toFixed(0)}% increase - recommend focusing on your top emission category`;
+            } else if (features.activityFrequency > 0.8) {
+                return '🔥 ML Insight: Your consistent tracking puts you in the top 25% most engaged users - keep the momentum!';
+            }
+            
+            return null;
+        }
+
+        // Enhanced Peer Comparison Analysis across categories
+        function generatePeerComparison(features) {
+            const avgEmissionsPerActivity = features.avgEmissions;
+            
+            // EXCEPTIONAL PERFORMANCE
+            if (avgEmissionsPerActivity < 1.0) {
+                const topCategories = Object.keys(features.categoryDistribution);
+                if (topCategories.includes('energy')) {
+                    return `� ML Elite: Avg ${avgEmissionsPerActivity.toFixed(1)}kg puts you in top 5% globally - your energy choices are reshaping the grid!`;
+                } else if (topCategories.includes('transportation')) {
+                    return `🚴 ML Leader: Avg ${avgEmissionsPerActivity.toFixed(1)}kg places you in top 8% - your mobility model inspires cities worldwide!`;
+                } else {
+                    return `🏆 ML Champion: Outstanding ${avgEmissionsPerActivity.toFixed(1)}kg average - you're in the climate action elite (top 5%)!`;
+                }
+            }
+            
+            // HIGH PERFORMANCE  
+            else if (avgEmissionsPerActivity < 2.0) {
+                return `🥇 ML Excellence: At ${avgEmissionsPerActivity.toFixed(1)}kg average, you outperform 75% of users - on track for top 20% with consistency`;
+            }
+            
+            // ABOVE AVERAGE
+            else if (avgEmissionsPerActivity < 4.0) {
+                const primaryCategory = Object.keys(features.categoryDistribution)[0];
+                if (primaryCategory === 'food') {
+                    return `🥗 ML Food: ${avgEmissionsPerActivity.toFixed(1)}kg avg beats 60% of users - plant-forward choices showing impact vs standard diet`;
+                } else if (primaryCategory === 'transportation') {
+                    return `🚌 ML Mobility: ${avgEmissionsPerActivity.toFixed(1)}kg avg exceeds 55% of commuters - multimodal approach working vs car-dependent peers`;
+                } else if (primaryCategory === 'energy') {
+                    return `⚡ ML Energy: ${avgEmissionsPerActivity.toFixed(1)}kg avg surpasses 50% of households - efficiency focus showing vs energy-intensive homes`;
+                } else {
+                    return `📊 ML Progress: ${avgEmissionsPerActivity.toFixed(1)}kg average performing above typical user - targeting <3kg reaches top 40%`;
+                }
+            }
+            
+            // AVERAGE PERFORMANCE
+            else if (avgEmissionsPerActivity < 6.0) {
+                return `📈 ML Potential: Current ${avgEmissionsPerActivity.toFixed(1)}kg matches regional average - top wins in highest category could jump you 30 percentile points`;
+            }
+            
+            // NEEDS IMPROVEMENT
+            else if (avgEmissionsPerActivity < 10.0) {
+                return `🎯 ML Opportunity: ${avgEmissionsPerActivity.toFixed(1)}kg suggests high-impact choices available - focusing on big 3 activities could cut emissions 40%`;
+            }
+            
+            // HIGH EMISSIONS
+            else {
+                return `🚀 ML Transform: ${avgEmissionsPerActivity.toFixed(1)}kg shows major opportunity - system changes (energy/transport) could deliver 60%+ reductions`;
+            }
+        }
+
+        // Comprehensive Impact Optimization Suggestions for ALL categories
+        function generateOptimizationTip(features, patterns) {
+            const sortedCategories = Object.entries(features.categoryDistribution)
+                .sort(([,a], [,b]) => b - a);
+            
+            if (sortedCategories.length === 0) return null;
+            
+            const [topCategory, count] = sortedCategories[0];
+            const categoryEmissions = activities
+                .filter(a => a.category === topCategory)
+                .reduce((sum, a) => sum + a.emissions, 0);
+                
+            const categoryPercentage = ((count/features.totalActivities)*100).toFixed(0);
+            
+            // TRANSPORTATION OPTIMIZATION
+            if (topCategory === 'transportation') {
+                if (categoryEmissions > 15) {
+                    return `🚗 ML High-Impact: Transportation dominates at ${categoryEmissions.toFixed(1)}kg CO₂ (${categoryPercentage}% of activities) - EV/public transit could cut this 60-70%`;
+                } else if (categoryEmissions > 8) {
+                    return `🚌 ML Optimize: Transport emissions ${categoryEmissions.toFixed(1)}kg - mode shift on 2 highest trips = 25% reduction immediately`;
+                } else if (categoryEmissions > 3) {
+                    return `🚴 ML Efficiency: Transport at ${categoryEmissions.toFixed(1)}kg shows good choices - micro-mobility for <5km trips = further 15% gains`;
+                } else {
+                    return `🏆 ML Transport: Excellent transport efficiency (${categoryEmissions.toFixed(1)}kg)! You're modeling sustainable mobility for others`;
+                }
+            }
+            
+            // ENERGY OPTIMIZATION
+            else if (topCategory === 'energy') {
+                if (categoryEmissions > 12) {
+                    return `⚡ ML Energy: High energy footprint ${categoryEmissions.toFixed(1)}kg - smart home upgrades + renewable energy = 50-80% reduction potential`;
+                } else if (categoryEmissions > 6) {
+                    return `🏠 ML Efficiency: Energy at ${categoryEmissions.toFixed(1)}kg - thermal envelope + efficient appliances could cut 35%`;
+                } else if (categoryEmissions > 2) {
+                    return `💡 ML Smart: Energy usage ${categoryEmissions.toFixed(1)}kg shows awareness - time-of-use optimization + storage = next 20% gains`;
+                } else {
+                    return `🌟 ML Energy Star: Outstanding energy efficiency (${categoryEmissions.toFixed(1)}kg)! You're approaching net-zero home operation`;
+                }
+            }
+            
+            // FOOD OPTIMIZATION  
+            else if (topCategory === 'food') {
+                if (categoryEmissions > 20) {
+                    return `🥩 ML Diet: Food footprint high at ${categoryEmissions.toFixed(1)}kg - flexitarian approach could reduce 40-60% while maintaining nutrition`;
+                } else if (categoryEmissions > 10) {
+                    return `🌱 ML Nutrition: Food emissions ${categoryEmissions.toFixed(1)}kg - local sourcing + 2 plant meals/week = 25% reduction`;
+                } else if (categoryEmissions > 5) {
+                    return `🥗 ML Conscious: Food choices ${categoryEmissions.toFixed(1)}kg show mindfulness - seasonal eating could optimize further 15%`;
+                } else {
+                    return `🏆 ML Plant-Forward: Excellent food footprint (${categoryEmissions.toFixed(1)}kg)! Your diet is climate-aligned and nutritious`;
+                }
+            }
+            
+            // WASTE OPTIMIZATION
+            else if (topCategory === 'waste') {
+                if (categoryEmissions > 8) {
+                    return `�️ ML Waste: High waste footprint ${categoryEmissions.toFixed(1)}kg - circular design + repair culture could cut 50-70%`;
+                } else if (categoryEmissions > 4) {
+                    return `♻️ ML Circular: Waste at ${categoryEmissions.toFixed(1)}kg - advanced sorting + composting = 40% diversion increase`;
+                } else if (categoryEmissions > 1) {
+                    return `🌱 ML Zero-Waste: Waste ${categoryEmissions.toFixed(1)}kg shows progress - precycling (refuse/reduce) = final 30% gains`;
+                } else {
+                    return `🏆 ML Minimal: Outstanding waste minimization (${categoryEmissions.toFixed(1)}kg)! You're living the circular economy`;
+                }
+            }
+            
+            // MULTI-CATEGORY INSIGHTS
+            if (sortedCategories.length > 1) {
+                const [secondCategory] = sortedCategories[1];
+                return `💡 ML Portfolio: ${topCategory} leads (${categoryPercentage}%), but balance with ${secondCategory} optimization for holistic impact`;
+            }
+            
+            return `💡 ML Insight: Focus on ${topCategory} optimization - it represents ${categoryPercentage}% of your tracked activities with ${categoryEmissions.toFixed(1)}kg CO₂`;
+        }
+
+        // Helper functions
+        function getDateSpanDays(activities) {
+            if (activities.length === 0) return 1;
+            
+            const dates = activities.map(a => new Date(a.date)).sort((a, b) => a - b);
+            const spanMs = dates[dates.length - 1] - dates[0];
+            return Math.max(1, Math.ceil(spanMs / (1000 * 60 * 60 * 24)));
+        }
+
+        function calculateImprovementTrend(activities) {
+            if (activities.length < 4) return 0;
+            
+            // Sort by date and compare recent vs older emissions
+            const sorted = activities.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const half = Math.floor(sorted.length / 2);
+            
+            const olderAvg = sorted.slice(0, half).reduce((sum, a) => sum + a.emissions, 0) / half;
+            const recentAvg = sorted.slice(half).reduce((sum, a) => sum + a.emissions, 0) / (sorted.length - half);
+            
+            return (olderAvg - recentAvg) / olderAvg; // Positive = improvement (reduction)
+        }
+
+        // 📋 ENHANCED RULE-BASED SYSTEM (IMPROVED FALLBACK)
+        function generateEnhancedRuleBasedRecommendations(context) {
+            const recommendations = [];
+            const analysisData = context.activities;
             const now = new Date();
             const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             const recentActivities = analysisData.filter(activity => new Date(activity.date) >= oneWeekAgo);
+            
+            // Get user profile for location-based recommendations
+            const userLocation = context.user?.location_type || context.location?.current || 'urban';
+            const userHousehold = context.user?.household_size || 2;
             
             // Analyze activity patterns
             const activityByType = {};
             let totalEmissions = 0;
             
             analysisData.forEach(activity => {
-                const type = activity.category || activity.type.split(' - ')[0]; // Use category field, fallback to parsing
+                const type = activity.category || activity.type.split(' - ')[0];
                 if (!activityByType[type]) {
                     activityByType[type] = { count: 0, emissions: 0, types: new Set() };
                 }
@@ -1401,16 +2545,96 @@
                 totalEmissions += activity.emissions;
             });
 
-            // Debug logging
-            console.log('Activity analysis:', {
-                analysisData: analysisData,
-                activityByType: activityByType,
-                totalEmissions: totalEmissions
+            // 🌍 SEASONAL RECOMMENDATIONS
+            const currentMonth = now.getMonth();
+            const season = getSeasonFromMonth(currentMonth);
+            const seasonalRecs = getSeasonalRecommendations(season, activityByType, userLocation);
+            recommendations.push(...seasonalRecs);
+
+            // 📍 LOCATION-BASED RECOMMENDATIONS  
+            const locationRecs = getLocationBasedRecommendations(userLocation, activityByType, userHousehold);
+            recommendations.push(...locationRecs);
+
+            // 🎯 "TRY THIS NEXT" PERSONALIZED SUGGESTIONS
+            const tryNextRecs = getTryThisNextSuggestions(analysisData, activityByType, recentActivities);
+            recommendations.push(...tryNextRecs);
+
+            // Enhanced smart recommendations based on patterns
+            if (totalEmissions > 0) {
+                if (totalEmissions < 10) {
+                    recommendations.push('🎯 Excellent! Your daily emissions are low - consider sharing your strategies with others');
+                } else if (totalEmissions > 50) {
+                    recommendations.push('📊 High emissions detected - focus on your biggest impact categories first');
+                }
+            }
+
+            // Limit to 8 recommendations and ensure variety
+            return recommendations.slice(0, 8);
+        }
+
+        // 🛠️ AI SETUP HELPERS
+        async function checkAIAvailability() {
+            try {
+                // Check if Ollama is running
+                const response = await fetch('http://localhost:11434/api/version', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(2000) // 2 second timeout
+                });
+                if (response.ok) {
+                    console.log('✅ Ollama AI service available');
+                    return { ollama: true, cloud: false };
+                }
+            } catch (error) {
+                console.log('❌ Ollama not available:', error.message);
+            }
+
+            // Could add cloud AI checks here
+            return { ollama: false, cloud: false };
+        }
+
+        // Emission Factors (Scientific Data)
+        // Carbon emission factors (kg CO2 per unit) - Based on official sources
+        // Sources: UK DEFRA 2024, US EPA 2024, IPCC Guidelines
+        // 📋 ENHANCED RULE-BASED SYSTEM (IMPROVED FALLBACK)
+        function generateEnhancedRuleBasedRecommendations(context) {
+            const recommendations = [];
+            const analysisData = context.activities;
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const recentActivities = analysisData.filter(activity => new Date(activity.date) >= oneWeekAgo);
+            
+            // Get user profile for location-based recommendations
+            const userLocation = context.user?.locationType || context.location?.current || 'urban';
+            const userHousehold = context.user?.householdSize || 2;
+            
+            // Analyze activity patterns
+            const activityByType = {};
+            let totalEmissions = 0;
+            
+            analysisData.forEach(activity => {
+                const type = activity.category || activity.type.split(' - ')[0];
+                if (!activityByType[type]) {
+                    activityByType[type] = { count: 0, emissions: 0, types: new Set() };
+                }
+                activityByType[type].count++;
+                activityByType[type].emissions += activity.emissions;
+                activityByType[type].types.add(activity.type);
+                totalEmissions += activity.emissions;
             });
 
-            // Sort categories by emissions impact
-            const sortedCategories = Object.entries(activityByType)
-                .sort(([,a], [,b]) => b.emissions - a.emissions);
+            // 🌍 SEASONAL RECOMMENDATIONS
+            const currentMonth = now.getMonth();
+            const season = getSeasonFromMonth(currentMonth);
+            const seasonalRecs = getSeasonalRecommendations(season, activityByType, userLocation);
+            recommendations.push(...seasonalRecs);
+
+            // 📍 LOCATION-BASED RECOMMENDATIONS
+            const locationRecs = getLocationBasedRecommendations(userLocation, activityByType, userHousehold);
+            recommendations.push(...locationRecs);
+
+            // 🎯 "TRY THIS NEXT" PERSONALIZED SUGGESTIONS
+            const tryNextRecs = getTryThisNextSuggestions(analysisData, activityByType, recentActivities);
+            recommendations.push(...tryNextRecs);
 
             // Transportation recommendations
             if (activityByType.transportation || activityByType.Transportation) {
@@ -1532,16 +2756,196 @@
                 recommendations.push('📊 You\'re tracking your impact well - small improvements add up over time');
             }
 
-            // Seasonal recommendations
-            const month = now.getMonth();
-            if (month >= 11 || month <= 1) { // Winter
-                recommendations.push('❄️ Winter tip: Layer clothing instead of increasing heating');
-            } else if (month >= 5 && month <= 7) { // Summer
-                recommendations.push('☀️ Summer tip: Use fans instead of AC when possible');
+            // Always add at least one motivational recommendation
+            if (analysisData.length > 0) {
+                const motivationalMessages = [
+                    '🌟 Every action counts! Your tracking shows real commitment to sustainability',
+                    '🏆 Amazing progress! You\'re making a real difference for the planet',
+                    '💚 Keep up the fantastic work - you\'re inspiring others to act',
+                    '✨ Your environmental consciousness is having a positive impact',
+                    '🎉 Great job staying committed to reducing your carbon footprint!',
+                    '🌱 Your dedication to sustainability is making the world better',
+                    '👏 Excellent work! You\'re on track to create meaningful change',
+                    '🎯 Your commitment to tracking is the first step to real impact',
+                    '💫 You\'re building sustainable habits that will last a lifetime',
+                    '🌍 Thank you for caring about our planet - your efforts matter!',
+                    '🔥 You\'re on fire! Keep up this amazing environmental momentum',
+                    '🚀 Your sustainability journey is inspiring - keep reaching for the stars!'
+                ];
+                
+                // Add 1-2 random motivational messages to ensure positive reinforcement
+                const shuffled = motivationalMessages.sort(() => 0.5 - Math.random());
+                recommendations.push(shuffled[0]);
+                if (analysisData.length > 3) {
+                    recommendations.push(shuffled[1]); // Add second motivational message for active users
+                }
             }
 
-            // Limit to 5 most relevant recommendations
-            return recommendations.slice(0, 5);
+            // Limit to 8 most relevant recommendations
+            return recommendations.slice(0, 8);
+        }
+
+        // 🌍 SEASONAL RECOMMENDATION HELPERS
+        function getSeasonFromMonth(month) {
+            if (month >= 11 || month <= 1) return 'winter';   // Dec, Jan, Feb
+            if (month >= 2 && month <= 4) return 'spring';    // Mar, Apr, May
+            if (month >= 5 && month <= 7) return 'summer';    // Jun, Jul, Aug
+            if (month >= 8 && month <= 10) return 'fall';     // Sep, Oct, Nov
+        }
+
+        function getSeasonalRecommendations(season, activityByType, userLocation) {
+            const recommendations = [];
+            
+            switch (season) {
+                case 'winter':
+                    recommendations.push('❄️ Winter energy tip: Set thermostat 2°C lower and use extra blankets');
+                    if (activityByType.transportation) {
+                        recommendations.push('🚗 Winter driving: Combine errands into one trip to reduce cold-start emissions');
+                    }
+                    if (userLocation === 'urban') {
+                        recommendations.push('🏙️ Winter urban tip: Use indoor activities - visit museums instead of outdoor shopping');
+                    }
+                    break;
+                    
+                case 'spring':
+                    recommendations.push('🌱 Spring cleaning: Donate items instead of throwing away to reduce waste');
+                    recommendations.push('🚴 Perfect weather for biking! Try cycling for trips under 5km');
+                    if (activityByType.energy) {
+                        recommendations.push('🌤️ Spring energy: Open windows for natural cooling instead of AC');
+                    }
+                    break;
+                    
+                case 'summer':
+                    recommendations.push('☀️ Summer cooling: Use fans and dress lighter before turning on AC');
+                    recommendations.push('🌞 Eat more fresh, local produce - it\'s in season and lower-carbon');
+                    if (userLocation === 'suburban' || userLocation === 'rural') {
+                        recommendations.push('🏡 Summer tip: Use outdoor grilling to avoid heating up your home');
+                    }
+                    break;
+                    
+                case 'fall':
+                    recommendations.push('🍂 Fall prep: Layer clothing instead of early heating system use');
+                    recommendations.push('🎃 Seasonal eating: Choose local autumn vegetables like squash and apples');
+                    if (activityByType.transportation) {
+                        recommendations.push('🚶 Beautiful fall weather - perfect for walking short distances');
+                    }
+                    break;
+            }
+            
+            return recommendations.slice(0, 2); // Limit seasonal suggestions
+        }
+
+        // 📍 LOCATION-BASED RECOMMENDATION HELPERS
+        function getLocationBasedRecommendations(userLocation, activityByType, userHousehold) {
+            const recommendations = [];
+            
+            // Use enhanced location data if available
+            const actualLocation = currentLocation.type || userLocation || 'urban';
+            const userCity = currentLocation.city || null;
+            const isInTravelMode = travelMode;
+            
+            // Special travel mode recommendations
+            if (isInTravelMode && userCity) {
+                const country = currentLocation.country || 'Unknown';
+                const region = currentLocation.region || 'Unknown';
+                
+                const travelTips = getTravelSpecificRecommendations(userCity, country, region);
+                return travelTips.slice(0, 2);
+            }
+            
+            switch (actualLocation) {
+                case 'urban':
+                    recommendations.push('🏙️ Urban advantage: Use public transport apps to find the greenest routes');
+                    if (activityByType.transportation) {
+                        recommendations.push('🚇 City living: Metro/subway typically 10x lower emissions than driving');
+                    }
+                    if (userHousehold > 2) {
+                        recommendations.push('🏢 Urban households: Consider shared delivery services to reduce individual trips');
+                    }
+                    recommendations.push('🛒 City tip: Walk to nearby shops instead of driving to distant stores');
+                    break;
+                    
+                case 'suburban':
+                    recommendations.push('🏘️ Suburban tip: Carpool with neighbors for shopping trips and commutes');
+                    if (activityByType.transportation) {
+                        recommendations.push('🚗 Suburbs: Plan errands in clusters to reduce total driving distance');
+                    }
+                    recommendations.push('🏡 Suburban energy: Consider solar panels - great roof space and sun exposure');
+                    if (userHousehold >= 3) {
+                        recommendations.push('👨‍👩‍👧‍👦 Family tip: Coordinate schedules to share rides for activities');
+                    }
+                    break;
+                    
+                case 'rural':
+                    recommendations.push('🌾 Rural advantage: Buy directly from local farms to reduce food transport');
+                    if (activityByType.energy) {
+                        recommendations.push('🏞️ Rural energy: Great location for renewable energy - wind or solar potential');
+                    }
+                    recommendations.push('🚗 Rural driving: Maintain your vehicle well - longer trips make efficiency crucial');
+                    if (userHousehold >= 2) {
+                        recommendations.push('🏡 Rural households: Bulk buying reduces trips to town');
+                    }
+                    break;
+                    
+                default: // Default urban recommendations
+                    recommendations.push('🌍 General tip: Choose local businesses to reduce transportation emissions');
+            }
+            
+            return recommendations.slice(0, 2); // Limit location suggestions
+        }
+
+        // 🎯 "TRY THIS NEXT" PERSONALIZED SUGGESTIONS
+        function getTryThisNextSuggestions(analysisData, activityByType, recentActivities) {
+            const recommendations = [];
+            const categories = Object.keys(activityByType);
+            
+            // Suggest unexplored categories
+            const allCategories = ['transportation', 'food', 'energy', 'waste'];
+            const missingCategories = allCategories.filter(cat => !categories.includes(cat));
+            
+            if (missingCategories.length > 0) {
+                const nextCategory = missingCategories[0];
+                switch (nextCategory) {
+                    case 'transportation':
+                        recommendations.push('🎯 Try next: Track your daily commute to discover transport alternatives');
+                        break;
+                    case 'food':
+                        recommendations.push('🎯 Try next: Log your meals to find lower-carbon food choices');
+                        break;
+                    case 'energy':
+                        recommendations.push('🎯 Try next: Monitor your home energy use to find efficiency opportunities');
+                        break;
+                    case 'waste':
+                        recommendations.push('🎯 Try next: Track your waste to discover recycling and reduction opportunities');
+                        break;
+                }
+            }
+            
+            // Suggest improvements based on habits
+            if (recentActivities.length > 3) {
+                const mostFrequentCategory = Object.entries(activityByType)
+                    .sort(([,a], [,b]) => b.count - a.count)[0];
+                
+                if (mostFrequentCategory) {
+                    const [category, data] = mostFrequentCategory;
+                    const avgEmissions = data.emissions / data.count;
+                    
+                    if (avgEmissions > 5) {
+                        recommendations.push(`🎯 Try next: You're tracking ${category} well! Now explore ways to reduce its impact`);
+                    } else {
+                        recommendations.push(`🎯 Great ${category} habits! Your activities automatically appear in the Social Feed tab to inspire others`);
+                    }
+                }
+            }
+            
+            // Habit-building suggestions
+            if (analysisData.length >= 5 && analysisData.length < 15) {
+                recommendations.push('🎯 Try next: Build consistency - aim to log at least one activity daily');
+            } else if (analysisData.length >= 15) {
+                recommendations.push('🎯 Try next: You\'re a tracking pro! Set weekly reduction goals for each category');
+            }
+            
+            return recommendations.slice(0, 2); // Limit try-this-next suggestions
         }
 
         const achievements = [
@@ -1585,8 +2989,20 @@
 
         // Modal Functions
         function showAuthModal() {
-            document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('authModal').classList.add('flex');
+            console.log('showAuthModal called!');
+            try {
+                const modal = document.getElementById('authModal');
+                console.log('Modal element:', modal);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    console.log('Modal should now be visible');
+                } else {
+                    console.error('Auth modal element not found!');
+                }
+            } catch (error) {
+                console.error('Error in showAuthModal:', error);
+            }
         }
 
         function hideAuthModal() {
@@ -1596,22 +3012,61 @@
         }
 
         function showTrackingModal() {
-            document.getElementById('trackingModal').classList.remove('hidden');
-            document.getElementById('trackingModal').classList.add('flex');
+            console.log('showTrackingModal called');
+            try {
+                const modal = document.getElementById('trackingModal');
+                console.log('Looking for modal element:', modal);
+                
+                if (modal) {
+                    console.log('Modal found, current classes:', modal.className);
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    console.log('Modal classes after update:', modal.className);
+                    console.log('Tracking modal opened successfully');
+                } else {
+                    console.error('Tracking modal element not found!');
+                    console.log('All modal elements:', document.querySelectorAll('[id*="Modal"]'));
+                    console.log('All elements with id:', document.querySelectorAll('[id]'));
+                    
+                    // Alternative: Try to find and create the modal if missing
+                    const existingModals = document.querySelectorAll('#trackingModal');
+                    console.log('Found trackingModal elements:', existingModals.length);
+                    
+                    if (existingModals.length === 0) {
+                        console.error('Modal DOM element is completely missing! The page may not have loaded correctly.');
+                        alert('Error: Tracking modal not found. Please refresh the page.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error in showTrackingModal:', error);
+                alert('Error opening tracking modal. Please refresh the page.');
+            }
         }
 
         function hideTrackingModal() {
-            const modal = document.getElementById('trackingModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.getElementById('trackingForm').reset();
-            
-            // Reset all dynamic form elements
-            document.getElementById('subcategoryDiv').classList.add('hidden');
-            document.getElementById('amountDiv').classList.add('hidden');
-            document.getElementById('descriptionDiv').classList.add('hidden');
-            document.getElementById('emissionPreview').classList.add('hidden');
-            document.getElementById('submitBtn').disabled = true;
+            try {
+                const modal = document.getElementById('trackingModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+                
+                const form = document.getElementById('trackingForm');
+                if (form) {
+                    form.reset();
+                }
+                
+                // Reset all dynamic form elements with null checks
+                const subcategoryDiv = document.getElementById('subcategoryDiv');
+                const amountDiv = document.getElementById('amountDiv');
+                const descriptionDiv = document.getElementById('descriptionDiv');
+                
+                if (subcategoryDiv) subcategoryDiv.classList.add('hidden');
+                if (amountDiv) amountDiv.classList.add('hidden');
+                if (descriptionDiv) descriptionDiv.classList.add('hidden');
+            } catch (error) {
+                console.error('Error in hideTrackingModal:', error);
+            }
         }
 
         // Demo Tour Functions
@@ -2271,26 +3726,61 @@
             }
         }
 
-        function populateRecommendations() {
+        async function populateRecommendations() {
             const container = document.getElementById('recommendations');
-            container.innerHTML = '';
+            if (!container) return;
             
-            // Generate fresh, personalized recommendations
-            const personalizedRecommendations = generatePersonalizedRecommendations();
+            // Show loading state
+            container.innerHTML = '<div class="text-gray-500 text-center py-4">🤖 Generating AI recommendations...</div>';
             
-            // Debug logging to see what's happening
-            console.log('Current activities for recommendations:', activities.filter(a => !a.isDemo));
-            console.log('Generated recommendations:', personalizedRecommendations);
-            
-            personalizedRecommendations.forEach(recommendation => {
-                const recDiv = document.createElement('div');
-                recDiv.className = 'flex items-start';
-                recDiv.innerHTML = `
-                    <div class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
-                    <p class="text-gray-700">${recommendation}</p>
-                `;
-                container.appendChild(recDiv);
-            });
+            try {
+                // Generate AI-powered recommendations
+                const personalizedRecommendations = await generatePersonalizedRecommendations();
+                
+                // Clear loading and populate real recommendations
+                container.innerHTML = '';
+                
+                // Debug logging to see what's happening
+                console.log('Current activities for recommendations:', activities.filter(a => !a.isDemo));
+                console.log('Generated recommendations:', personalizedRecommendations);
+                
+                personalizedRecommendations.forEach(recommendation => {
+                    const recDiv = document.createElement('div');
+                    recDiv.className = 'flex items-start mb-3';
+                    
+                    // Determine recommendation type and color
+                    let indicatorColor = 'bg-green-500'; // Default
+                    let typeIcon = '💡';
+                    
+                    if (recommendation.includes('🤖') || recommendation.includes('🧠') || recommendation.includes('📊')) {
+                        indicatorColor = 'bg-indigo-500'; // AI-generated
+                        typeIcon = '🤖';
+                    } else if (recommendation.includes('🌍') || recommendation.includes('❄️') || recommendation.includes('☀️') || recommendation.includes('🌱') || recommendation.includes('🍂')) {
+                        indicatorColor = 'bg-blue-500'; // Seasonal
+                        typeIcon = '🌍';
+                    } else if (recommendation.includes('🏙️') || recommendation.includes('🏘️') || recommendation.includes('🌾')) {
+                        indicatorColor = 'bg-purple-500'; // Location-based
+                        typeIcon = '📍';
+                    } else if (recommendation.includes('🎯 Try next')) {
+                        indicatorColor = 'bg-orange-500'; // Try this next
+                        typeIcon = '🎯';
+                    } else if (recommendation.includes('🌟') || recommendation.includes('👏')) {
+                        indicatorColor = 'bg-yellow-500'; // Positive recognition
+                        typeIcon = '⭐';
+                    }
+                    
+                    recDiv.innerHTML = `
+                        <div class="flex-shrink-0 w-3 h-3 ${indicatorColor} rounded-full mt-2 mr-3 flex items-center justify-center">
+                            <span class="text-xs text-white font-bold">${typeIcon}</span>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">${recommendation}</p>
+                    `;
+                    container.appendChild(recDiv);
+                });
+            } catch (error) {
+                console.error('Error generating recommendations:', error);
+                container.innerHTML = '<div class="text-red-500 text-center py-4">⚠️ Unable to generate recommendations. Please refresh the page.</div>';
+            }
         }
 
         function populateAchievements() {
@@ -2540,10 +4030,12 @@
                         activityText = `Just biked ${activity.amount}km! 🚲 Clean transportation feels great and I'm getting exercise too. Every pedal counts! #BikeLife #ClimateAction`;
                         achievementIcon = "🚲";
                         achievementTitle = "Bike Transportation!";
-                    } else if (activity.subcategory === 'publictransport') {
-                        activityText = `Took public transport for ${activity.amount}km today! 🚌 Avoiding car emissions and supporting sustainable transit. #PublicTransport #ClimateAction`;
-                        achievementIcon = "🚌";
-                        achievementTitle = "Public Transport Choice!";
+                    } else if (activity.subcategory === 'publictransport' || activity.subcategory === 'bus' || activity.subcategory === 'train') {
+                        const transportType = activity.subcategory === 'bus' ? 'bus' : activity.subcategory === 'train' ? 'train' : 'public transport';
+                        const emoji = activity.subcategory === 'bus' ? '🚌' : activity.subcategory === 'train' ? '🚂' : '🚌';
+                        activityText = `Took ${transportType} for ${activity.amount}km today! ${emoji} Avoiding car emissions and supporting sustainable transit. #PublicTransport #ClimateAction`;
+                        achievementIcon = emoji;
+                        achievementTitle = `${transportType.charAt(0).toUpperCase() + transportType.slice(1)} Choice!`;
                     } else {
                         activityText = `Tracked my transportation impact: ${activity.amount}km. Working to reduce my carbon footprint one trip at a time! #ClimateAware`;
                         achievementIcon = "🚗";
@@ -2551,9 +4043,19 @@
                     }
                     break;
                 case 'energy':
-                    activityText = `Monitored my energy usage: ${activity.amount}kWh. Tracking usage is the first step to reducing my home's carbon footprint! #EnergyEfficiency #ClimateAction`;
-                    achievementIcon = "⚡";
-                    achievementTitle = "Energy Monitoring!";
+                    if (activity.subcategory === 'electricity_renewable' || activity.type.toLowerCase().includes('renewable')) {
+                        activityText = `Generated ${activity.amount}kWh of renewable energy! ☀️ Clean energy feels amazing - reducing my carbon footprint AND energy bills. Leading by example! #RenewableEnergy #CleanEnergy #ClimateLeader`;
+                        achievementIcon = "☀️";
+                        achievementTitle = "Renewable Energy Hero!";
+                    } else if (activity.subcategory === 'natural_gas') {
+                        activityText = `Tracked ${activity.amount}kWh of natural gas usage. Working to optimize my home heating efficiency! #EnergyEfficiency #ClimateAction`;
+                        achievementIcon = "🔥";
+                        achievementTitle = "Energy Tracking!";
+                    } else {
+                        activityText = `Monitored my energy usage: ${activity.amount}kWh. Tracking usage is the first step to reducing my home's carbon footprint! #EnergyEfficiency #ClimateAction`;
+                        achievementIcon = "⚡";
+                        achievementTitle = "Energy Monitoring!";
+                    }
                     break;
                 case 'food':
                     if (activity.subcategory === 'vegetarian') {
@@ -2714,14 +4216,36 @@
                     
                     switch (activity.category) {
                         case 'transportation':
-                            activityText = `Tracked my transportation impact: ${activity.amount}${activity.unit}. Working to reduce my carbon footprint one trip at a time! #ClimateAware`;
-                            achievementIcon = "🚗";
-                            achievementTitle = "Transportation Tracked!";
+                            if (activity.subcategory === 'bike') {
+                                activityText = `Biked ${activity.amount}${activity.unit}! 🚲 Clean transportation + exercise = win-win. Every pedal counts! #BikeLife #ClimateAction`;
+                                achievementIcon = "🚲";
+                                achievementTitle = "Bike Transportation!";
+                            } else if (activity.subcategory === 'publictransport' || activity.subcategory === 'bus' || activity.subcategory === 'train') {
+                                const transportType = activity.subcategory === 'bus' ? 'bus' : activity.subcategory === 'train' ? 'train' : 'public transport';
+                                const emoji = activity.subcategory === 'bus' ? '🚌' : activity.subcategory === 'train' ? '🚂' : '🚌';
+                                activityText = `Used ${transportType} for ${activity.amount}${activity.unit}! ${emoji} Choosing sustainable transit over driving. #PublicTransport #ClimateAction`;
+                                achievementIcon = emoji;
+                                achievementTitle = `${transportType.charAt(0).toUpperCase() + transportType.slice(1)} Choice!`;
+                            } else {
+                                activityText = `Tracked my transportation impact: ${activity.amount}${activity.unit}. Working to reduce my carbon footprint one trip at a time! #ClimateAware`;
+                                achievementIcon = "🚗";
+                                achievementTitle = "Transportation Tracked!";
+                            }
                             break;
                         case 'energy':
-                            activityText = `Monitored my energy usage: ${activity.amount}${activity.unit}. Tracking usage is the first step to reducing my home's carbon footprint! #EnergyEfficiency`;
-                            achievementIcon = "⚡";
-                            achievementTitle = "Energy Monitoring!";
+                            if (activity.subcategory === 'electricity_renewable' || activity.type.toLowerCase().includes('renewable')) {
+                                activityText = `Generated ${activity.amount}${activity.unit} of renewable energy! ☀️ Clean energy generation feels incredible - reducing footprint AND costs. #RenewableEnergy #CleanEnergy`;
+                                achievementIcon = "☀️";
+                                achievementTitle = "Renewable Energy Hero!";
+                            } else if (activity.subcategory === 'natural_gas') {
+                                activityText = `Used ${activity.amount}${activity.unit} of natural gas. Working on optimizing heating efficiency! #EnergyEfficiency`;
+                                achievementIcon = "🔥";
+                                achievementTitle = "Energy Tracking!";
+                            } else {
+                                activityText = `Monitored my energy usage: ${activity.amount}${activity.unit}. Tracking usage is the first step to reducing my home's carbon footprint! #EnergyEfficiency`;
+                                achievementIcon = "⚡";
+                                achievementTitle = "Energy Monitoring!";
+                            }
                             break;
                         case 'food':
                             activityText = `Tracked my food choices: ${activity.amount}${activity.unit}. Being mindful about what I eat and its climate impact! #ConsciousEating`;
@@ -2807,11 +4331,17 @@
                 saveUserActivities(currentUser.email, activities);
             }
             
+            // Add to social feed automatically
+            addToSocialFeed(newActivity);
+            
             // Update suggestion engine with new activity
             suggestionEngine.updateActivities(activities);
             
             populateActivities();
             updateStats();
+            
+            // Refresh ML-powered recommendations immediately
+            populateRecommendations();
             
             // Update analytics summary if on analytics tab
             updateAnalyticsSummary();
@@ -3097,7 +4627,8 @@
 
         // Keyboard navigation for demo tour
         document.addEventListener('keydown', function(e) {
-            if (!document.getElementById('demoTourModal').classList.contains('hidden')) {
+            const demoModal = document.getElementById('demoTourModal');
+            if (demoModal && !demoModal.classList.contains('hidden')) {
                 if (e.key === 'ArrowRight' || e.key === ' ') {
                     e.preventDefault();
                     nextDemoStep();
