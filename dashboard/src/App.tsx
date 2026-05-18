@@ -7,8 +7,10 @@ import {
 import {
   Cpu, Zap, Leaf, TrendingDown, Activity, BarChart2,
   Settings, Globe, RefreshCw, Server, GitBranch, Layers,
-  ArrowUpRight, ArrowDownRight
+  ArrowUpRight, ArrowDownRight, Shield, TrendingUp
 } from 'lucide-react'
+import SafetyTab from './SafetyTab'
+import TradeoffTab from './TradeoffTab'
 import {
   fetchWorkloadSummary, fetchWorkloadsByModel, fetchPareto,
   fetchPipelines, fetchGridIntensity, fetchTelemetrySummary,
@@ -631,6 +633,8 @@ const TABS = [
   { id: 'pipelines', label: 'Pipelines', icon: GitBranch },
   { id: 'carbon', label: 'Carbon Grid', icon: Globe },
   { id: 'telemetry', label: 'Telemetry', icon: Cpu },
+  { id: 'safety', label: 'Safety Monitor', icon: Shield },
+  { id: 'tradeoffs', label: 'Trade-off Intelligence', icon: TrendingUp },
 ]
 
 export default function App() {
@@ -646,7 +650,7 @@ export default function App() {
               <Leaf className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-white">CarbonSense</span>
-            <span className="text-xs text-slate-500 hidden sm:block">AI Energy Observability</span>
+            <span className="text-xs text-slate-500 hidden sm:block">AI Runtime Intelligence</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-500 hidden md:block">Updated {lastRefresh.toLocaleTimeString()}</span>
@@ -684,6 +688,8 @@ export default function App() {
         {tab === 'pipelines' && <PipelinesTab />}
         {tab === 'carbon' && <CarbonGridTab />}
         {tab === 'telemetry' && <TelemetryTab />}
+        {tab === 'safety' && <SafetyTab />}
+        {tab === 'tradeoffs' && <TradeoffTab />}
       </div>
     </div>
   )

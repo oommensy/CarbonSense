@@ -1,7 +1,7 @@
 """
-CarbonSense API v2 — AI Energy Observability Platform
-The Datadog for AI sustainability: GPU/NPU telemetry, carbon-aware inference,
-green scores, Pareto dashboards, and model optimization recommendations.
+CarbonSense API v2 — AI Runtime Intelligence Platform
+The only platform that correlates performance, energy, carbon, and safety
+in real time — so every optimization decision is fully visible.
 """
 
 import logging
@@ -53,10 +53,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="CarbonSense API",
     description=(
-        "**The Datadog for AI Energy & Sustainability.**\n\n"
-        "Monitor GPU/NPU telemetry, track carbon per inference, "
-        "optimize models for energy efficiency, and schedule workloads "
-        "carbon-aware across regions."
+        "**The Datadog for AI Energy & Sustainability — now with Safety Intelligence.**\n\n"
+        "Monitor GPU/NPU telemetry, track carbon per inference, evaluate safety in real time, "
+        "and understand how every optimization decision (quantization, batching, edge deployment) "
+        "affects performance, carbon footprint, AND safety — simultaneously."
     ),
     version="2.0.0",
     docs_url="/docs",
@@ -91,7 +91,7 @@ async def root():
     return {
         "service": "CarbonSense API",
         "version": "2.0.0",
-        "tagline": "The Datadog for AI Energy & Sustainability",
+        "tagline": "AI Runtime Intelligence: Performance + Carbon + Safety — Unified",
         "docs": "/docs",
         "capabilities": [
             "GPU/NPU real-time telemetry ingestion",
@@ -102,6 +102,8 @@ async def root():
             "Carbon-aware inference scheduling",
             "Edge vs Cloud cost/energy/carbon comparison",
             "Grid carbon intensity (7 regions, real-time)",
+            "Real-time safety evaluation (PII, injection, toxicity, hallucination)",
+            "Trade-off Intelligence: correlate optimization decisions with safety regressions",
         ],
     }
 

@@ -41,3 +41,34 @@ export const fetchNodes = () =>
 
 export const fetchLiveTelemetry = (limit = 50) =>
   api.get(`/telemetry/live?limit=${limit}`).then(r => r.data)
+
+// ── Safety Monitor ──────────────────────────────────────────────────────────
+export const fetchSafetySummary = (days = 7) =>
+  api.get(`/safety/summary?days=${days}`).then(r => r.data)
+
+export const fetchSafetyEvents = (days = 7, severity?: string, eventType?: string) => {
+  let url = `/safety/events?days=${days}&limit=200`
+  if (severity) url += `&severity=${severity}`
+  if (eventType) url += `&event_type=${eventType}`
+  return api.get(url).then(r => r.data)
+}
+
+export const fetchSafetyEventCounts = (days = 7) =>
+  api.get(`/safety/events/counts?days=${days}`).then(r => r.data)
+
+export const evaluateSafety = (payload: {
+  prompt?: string; response?: string; model_name?: string; quantization?: string
+}) => api.post('/safety/evaluate', payload).then(r => r.data)
+
+// ── Trade-off Analytics ─────────────────────────────────────────────────────
+export const fetchGlobalInsights = (days = 7) =>
+  api.get(`/analytics/insights?days=${days}`).then(r => r.data)
+
+export const fetchCorrelations = (days = 7) =>
+  api.get(`/analytics/correlations?days=${days}`).then(r => r.data)
+
+export const fetchScatterData = (x = 'total_carbon_g_co2e', y = 'safety_score', days = 7) =>
+  api.get(`/analytics/scatter?x=${x}&y=${y}&days=${days}`).then(r => r.data)
+
+export const fetchPipelineTradeoffs = (pipelineId: number, days = 30) =>
+  api.get(`/analytics/pipeline/${pipelineId}/tradeoffs?days=${days}`).then(r => r.data)

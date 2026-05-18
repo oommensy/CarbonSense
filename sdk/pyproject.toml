@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "carbonsense"
+version = "0.2.0"
+description = "One-line AI telemetry: performance, energy, carbon, and safety — simultaneously."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+keywords = ["llm", "ai", "observability", "carbon", "safety", "telemetry", "monitoring"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+openai  = ["openai>=1.0.0"]
+safety  = ["spacy>=3.7.0"]
+full    = ["openai>=1.0.0", "spacy>=3.7.0", "anthropic>=0.20.0"]
+
+[project.urls]
+Homepage    = "https://github.com/oommensy/CarbonSense"
+Repository  = "https://github.com/oommensy/CarbonSense"
+Issues      = "https://github.com/oommensy/CarbonSense/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["carbonsense*"]

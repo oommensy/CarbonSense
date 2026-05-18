@@ -205,6 +205,20 @@ def seed_all(db: Session):
                 },
                 status="completed",
                 tags={"env": "production", "team": random.choice(["ml-platform", "search", "vision", "nlp"])},
+                # Safety fields — degrade with lower quantization
+                safety_score=round(max(0, min(100,
+                    95 - (15 if quant == 'int4' else 7 if quant == 'int8' else 2 if quant == 'gguf' else 0)
+                    + random.gauss(0, 4)
+                )), 1),
+                hallucination_risk=round(min(1.0, max(0,
+                    (0.18 if quant == 'int4' else 0.10 if quant == 'int8' else 0.05)
+                    + random.gauss(0, 0.02)
+                )), 3),
+                toxicity_score=round(max(0, random.gauss(0.03, 0.01)), 3),
+                pii_detected=random.random() < 0.04,
+                pii_count=random.randint(1, 3) if random.random() < 0.04 else 0,
+                injection_attempts=random.randint(0, 2) if random.random() < 0.03 else 0,
+                safety_violations=random.randint(0, 1) if random.random() < 0.05 else 0,
             )
             db.add(wl)
             all_workloads.append(wl)

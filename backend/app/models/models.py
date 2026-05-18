@@ -240,10 +240,57 @@ class AIWorkload(Base):
     tags                = Column(JSON)
     metadata_           = Column("metadata", JSON)
 
+    # ── Safety & RAI Scores (v2) ─────────────────────────────────────────────
+    safety_score        = Column(Float)           # 0–100, higher = safer
+    hallucination_risk  = Column(Float)           # 0–1 probability estimate
+    toxicity_score      = Column(Float)           # 0–1
+    pii_detected        = Column(Boolean, default=False)
+    pii_count           = Column(Integer, default=0)
+    injection_attempts  = Column(Integer, default=0)
+    safety_violations   = Column(Integer, default=0)
+    safety_events       = Column(JSON)            # list of safety event summaries
+
     project             = relationship("Project", back_populates="workloads")
     node                = relationship("HardwareNode", back_populates="workloads")
     telemetry           = relationship("GPUTelemetry", back_populates="workload")
     pipeline            = relationship("InferencePipeline", back_populates="workloads")
+    safety_event_records = relationship("SafetyEvent", back_populates="workload")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Safety Events (v2 — RAI integration)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class SafetyEventType(str, enum.Enum):
+    PII_DETECTED        = "pii_detected"
+    TOXICITY_FLAGGED    = "toxicity_flagged"
+    INJECTION_ATTEMPT   = "injection_attempt"
+    HALLUCINATION_RISK  = "hallucination_risk"
+    UNSAFE_CONTENT      = "unsafe_content"
+    ANOMALY             = "anomaly"
+
+class SafetySeverity(str, enum.Enum):
+    LOW      = "low"
+    MEDIUM   = "medium"
+    HIGH     = "high"
+    CRITICAL = "critical"
+
+class SafetyEvent(Base):
+    """Individual safety violation or risk event tied to a workload."""
+    __tablename__ = "safety_events"
+
+    id              = Column(Integer, primary_key=True, index=True)
+    workload_id     = Column(Integer, ForeignKey("ai_workloads.id"), nullable=False)
+    pipeline_id     = Column(Integer, ForeignKey("inference_pipelines.id"), nullable=True)
+    event_type      = Column(SQLEnum(SafetyEventType), nullable=False, index=True)
+    severity        = Column(SQLEnum(SafetySeverity), default=SafetySeverity.MEDIUM)
+    detail          = Column(Text)                # human-readable description
+    score           = Column(Float)               # event-specific score (0–1)
+    blocked         = Column(Boolean, default=False)
+    metadata_       = Column("metadata", JSON)
+    timestamp       = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+    workload        = relationship("AIWorkload", back_populates="safety_event_records")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -272,6 +319,12 @@ class InferencePipeline(Base):
     total_requests      = Column(Integer, default=0)
     avg_latency_ms      = Column(Float)
     carbon_per_request_g = Column(Float)
+
+    # ── Aggregate Safety Metrics (v2) ────────────────────────────────────────
+    avg_safety_score        = Column(Float, default=100.0)
+    total_safety_violations = Column(Integer, default=0)
+    total_injection_attempts = Column(Integer, default=0)
+    total_pii_incidents     = Column(Integer, default=0)
 
     project             = relationship("Project", back_populates="pipelines")
     workloads           = relationship("AIWorkload", back_populates="pipeline")
