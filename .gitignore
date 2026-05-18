@@ -91,3 +91,9 @@ api_keys.txt
 # Deployment
 .vercel
 .netlify
+# Additional ignores
+backend/carbonsense.db
+backend/__pycache__/
+dashboard/dist/
+*.pyc
+

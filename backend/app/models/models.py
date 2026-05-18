@@ -1,184 +1,366 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Text, ForeignKey, Enum as SQLEnum
+"""
+CarbonSense Data Models — AI Energy Observability Platform
+Covers: AI workloads, GPU/NPU telemetry, inference runs, green scores, pipelines.
+"""
+
+import enum
+from sqlalchemy import (
+    Column, Integer, String, Float, DateTime, Boolean,
+    Text, ForeignKey, Enum as SQLEnum, JSON
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
-from .database import Base
+from app.core.database import Base
 
-class UserRole(str, enum.Enum):
-    INDIVIDUAL = "individual"
-    CORPORATE = "corporate"
-    ADMIN = "admin"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Enumerations
+# ─────────────────────────────────────────────────────────────────────────────
+
+class HardwareType(str, enum.Enum):
+    GPU_NVIDIA_A100 = "gpu_nvidia_a100"
+    GPU_NVIDIA_H100 = "gpu_nvidia_h100"
+    GPU_NVIDIA_V100 = "gpu_nvidia_v100"
+    GPU_NVIDIA_T4   = "gpu_nvidia_t4"
+    GPU_AMD_MI300   = "gpu_amd_mi300"
+    NPU_GOOGLE_TPU  = "npu_google_tpu"
+    NPU_AWS_TRAINIUM = "npu_aws_trainium"
+    NPU_APPLE_ANE   = "npu_apple_ane"
+    CPU_GENERIC     = "cpu_generic"
+    EDGE_DEVICE     = "edge_device"
+
+
+class DeploymentTarget(str, enum.Enum):
+    CLOUD_AWS       = "cloud_aws"
+    CLOUD_GCP       = "cloud_gcp"
+    CLOUD_AZURE     = "cloud_azure"
+    EDGE_ON_PREM    = "edge_on_prem"
+    EDGE_MOBILE     = "edge_mobile"
+    EDGE_IOT        = "edge_iot"
+    HYBRID          = "hybrid"
+
+
+class ModelFramework(str, enum.Enum):
+    PYTORCH     = "pytorch"
+    TENSORFLOW  = "tensorflow"
+    ONNX        = "onnx"
+    TENSORRT    = "tensorrt"
+    TRITON      = "triton"
+    VLLM        = "vllm"
+    OLLAMA      = "ollama"
+    CUSTOM      = "custom"
+
+
+class WorkloadType(str, enum.Enum):
+    LLM_INFERENCE       = "llm_inference"
+    LLM_TRAINING        = "llm_training"
+    IMAGE_GENERATION    = "image_generation"
+    EMBEDDING           = "embedding"
+    CLASSIFICATION      = "classification"
+    OBJECT_DETECTION    = "object_detection"
+    SPEECH_TO_TEXT      = "speech_to_text"
+    TEXT_TO_SPEECH      = "text_to_speech"
+    FINE_TUNING         = "fine_tuning"
+    BATCH_INFERENCE     = "batch_inference"
+
+
+class GridRegion(str, enum.Enum):
+    US_EAST         = "us_east"
+    US_WEST         = "us_west"
+    EU_WEST         = "eu_west"
+    EU_NORTH        = "eu_north"
+    ASIA_PACIFIC    = "asia_pacific"
+    UK              = "uk"
+    CANADA          = "canada"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Organization / Project
+# ─────────────────────────────────────────────────────────────────────────────
+
+class Organization(Base):
+    __tablename__ = "organizations"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    name        = Column(String, nullable=False, unique=True)
+    slug        = Column(String, nullable=False, unique=True, index=True)
+    api_key     = Column(String, unique=True, index=True)
+    plan        = Column(String, default="free")   # free | pro | enterprise
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())
+
+    projects    = relationship("Project", back_populates="org")
+    users       = relationship("User", back_populates="org")
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    org_id      = Column(Integer, ForeignKey("organizations.id"), nullable=False)
+    name        = Column(String, nullable=False)
+    description = Column(Text)
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())
+
+    org         = relationship("Organization", back_populates="projects")
+    pipelines   = relationship("InferencePipeline", back_populates="project")
+    workloads   = relationship("AIWorkload", back_populates="project")
+
 
 class User(Base):
     __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    username = Column(String, unique=True, index=True, nullable=False)
+
+    id              = Column(Integer, primary_key=True, index=True)
+    org_id          = Column(Integer, ForeignKey("organizations.id"), nullable=True)
+    email           = Column(String, unique=True, index=True, nullable=False)
+    username        = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    full_name = Column(String)
-    role = Column(SQLEnum(UserRole), default=UserRole.INDIVIDUAL)
-    is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)
-    avatar_url = Column(String)
-    carbon_goal = Column(Float, default=1000.0)  # Annual carbon goal in kg CO2
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
-    # Relationships
-    carbon_entries = relationship("CarbonEntry", back_populates="user")
-    challenge_participations = relationship("ChallengeParticipation", back_populates="user")
-    achievements = relationship("UserAchievement", back_populates="user")
-    corporate_profile = relationship("CorporateProfile", back_populates="user", uselist=False)
+    full_name       = Column(String)
+    is_active       = Column(Boolean, default=True)
+    created_at      = Column(DateTime(timezone=True), server_default=func.now())
 
-class CarbonCategory(str, enum.Enum):
-    TRANSPORT = "transport"
-    ENERGY = "energy"
-    FOOD = "food"
-    WASTE = "waste"
-    CONSUMPTION = "consumption"
+    org             = relationship("Organization", back_populates="users")
 
-class CarbonEntry(Base):
-    __tablename__ = "carbon_entries"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    category = Column(SQLEnum(CarbonCategory), nullable=False)
-    activity = Column(String, nullable=False)
-    amount = Column(Float, nullable=False)
-    unit = Column(String, nullable=False)
-    carbon_footprint = Column(Float, nullable=False)  # kg CO2
-    location = Column(String)  # Optional location
-    notes = Column(Text)
-    verified = Column(Boolean, default=False)
-    verification_source = Column(String)  # IoT, satellite, manual, etc.
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # Relationships
-    user = relationship("User", back_populates="carbon_entries")
 
-class ChallengeType(str, enum.Enum):
-    INDIVIDUAL = "individual"
-    COMMUNITY = "community"
-    CORPORATE = "corporate"
+# ─────────────────────────────────────────────────────────────────────────────
+# Hardware Nodes
+# ─────────────────────────────────────────────────────────────────────────────
 
-class ChallengeStatus(str, enum.Enum):
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    EXPIRED = "expired"
+class HardwareNode(Base):
+    """Represents a physical or virtual compute node being monitored."""
+    __tablename__ = "hardware_nodes"
 
-class Challenge(Base):
-    __tablename__ = "challenges"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    description = Column(Text)
-    challenge_type = Column(SQLEnum(ChallengeType), nullable=False)
-    target_reduction = Column(Float)  # Target CO2 reduction in kg
-    duration_days = Column(Integer, default=30)
-    points_reward = Column(Integer, default=100)
-    status = Column(SQLEnum(ChallengeStatus), default=ChallengeStatus.ACTIVE)
-    start_date = Column(DateTime(timezone=True))
-    end_date = Column(DateTime(timezone=True))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # Relationships
-    participations = relationship("ChallengeParticipation", back_populates="challenge")
+    id              = Column(Integer, primary_key=True, index=True)
+    org_id          = Column(Integer, ForeignKey("organizations.id"), nullable=False)
+    name            = Column(String, nullable=False)
+    hardware_type   = Column(SQLEnum(HardwareType), nullable=False)
+    deployment      = Column(SQLEnum(DeploymentTarget), nullable=False)
+    grid_region     = Column(SQLEnum(GridRegion), default=GridRegion.US_EAST)
+    count           = Column(Integer, default=1)       # number of GPUs/NPUs
+    tdp_watts       = Column(Float)                    # thermal design power per unit
+    memory_gb       = Column(Float)
+    location        = Column(String)
+    cloud_instance  = Column(String)                   # e.g., "p4d.24xlarge"
+    cost_per_hour   = Column(Float)                    # USD/hr
+    is_active       = Column(Boolean, default=True)
+    registered_at   = Column(DateTime(timezone=True), server_default=func.now())
 
-class ParticipationStatus(str, enum.Enum):
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    telemetry       = relationship("GPUTelemetry", back_populates="node")
+    workloads       = relationship("AIWorkload", back_populates="node")
 
-class ChallengeParticipation(Base):
-    __tablename__ = "challenge_participations"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=False)
-    status = Column(SQLEnum(ParticipationStatus), default=ParticipationStatus.ACTIVE)
-    progress = Column(Float, default=0.0)  # Progress percentage
-    carbon_saved = Column(Float, default=0.0)  # Actual CO2 saved
-    joined_at = Column(DateTime(timezone=True), server_default=func.now())
-    completed_at = Column(DateTime(timezone=True))
-    
-    # Relationships
-    user = relationship("User", back_populates="challenge_participations")
-    challenge = relationship("Challenge", back_populates="participations")
 
-class AchievementType(str, enum.Enum):
-    MILESTONE = "milestone"
-    STREAK = "streak"
-    REDUCTION = "reduction"
-    COMMUNITY = "community"
+# ─────────────────────────────────────────────────────────────────────────────
+# GPU / NPU Telemetry (time-series)
+# ─────────────────────────────────────────────────────────────────────────────
 
-class Achievement(Base):
-    __tablename__ = "achievements"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    description = Column(Text)
-    achievement_type = Column(SQLEnum(AchievementType), nullable=False)
-    criteria = Column(Text)  # JSON string with criteria
-    points = Column(Integer, default=50)
-    icon_url = Column(String)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # Relationships
-    user_achievements = relationship("UserAchievement", back_populates="achievement")
+class GPUTelemetry(Base):
+    """Real-time or sampled GPU/NPU utilization and power metrics."""
+    __tablename__ = "gpu_telemetry"
 
-class UserAchievement(Base):
-    __tablename__ = "user_achievements"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    achievement_id = Column(Integer, ForeignKey("achievements.id"), nullable=False)
-    earned_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    # Relationships
-    user = relationship("User", back_populates="achievements")
-    achievement = relationship("Achievement", back_populates="user_achievements")
+    id                  = Column(Integer, primary_key=True, index=True)
+    node_id             = Column(Integer, ForeignKey("hardware_nodes.id"), nullable=False)
+    workload_id         = Column(Integer, ForeignKey("ai_workloads.id"), nullable=True)
+    timestamp           = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
-class CorporateProfile(Base):
-    __tablename__ = "corporate_profiles"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    company_name = Column(String, nullable=False)
-    industry = Column(String)
-    employee_count = Column(Integer)
-    annual_revenue = Column(Float)
-    sustainability_goals = Column(Text)  # JSON string
-    carbon_target = Column(Float)  # Annual target in tons CO2
-    verification_status = Column(String, default="pending")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
-    # Relationships
-    user = relationship("User", back_populates="corporate_profile")
+    # Utilization
+    gpu_utilization_pct = Column(Float)    # 0–100
+    memory_used_gb      = Column(Float)
+    memory_total_gb     = Column(Float)
+    memory_utilization_pct = Column(Float)
 
-class IoTDevice(Base):
-    __tablename__ = "iot_devices"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    device_type = Column(String, nullable=False)  # smart_meter, vehicle_tracker, etc.
-    device_id = Column(String, unique=True, nullable=False)
-    name = Column(String)
-    location = Column(String)
-    is_active = Column(Boolean, default=True)
-    last_reading_at = Column(DateTime(timezone=True))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Power
+    power_draw_watts    = Column(Float)    # instantaneous
+    power_limit_watts   = Column(Float)
+    temperature_c       = Column(Float)
+    fan_speed_pct       = Column(Float)
 
-class IoTReading(Base):
-    __tablename__ = "iot_readings"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(Integer, ForeignKey("iot_devices.id"), nullable=False)
-    reading_type = Column(String, nullable=False)  # energy, fuel, etc.
-    value = Column(Float, nullable=False)
-    unit = Column(String, nullable=False)
-    carbon_equivalent = Column(Float)  # Calculated CO2 equivalent
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
-    reading_metadata = Column(Text)  # JSON for additional data
+    # Computed energy
+    energy_kwh          = Column(Float)    # energy consumed in this sample window
+    carbon_g_co2e       = Column(Float)    # grams CO2e for this window
+    grid_intensity      = Column(Float)    # gCO2e/kWh at time of measurement
+
+    # Throughput
+    tokens_per_second   = Column(Float)
+    requests_per_second = Column(Float)
+    batch_size          = Column(Integer)
+
+    node                = relationship("HardwareNode", back_populates="telemetry")
+    workload            = relationship("AIWorkload", back_populates="telemetry")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AI Workloads
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AIWorkload(Base):
+    """A discrete AI job: training run, inference batch, fine-tune, etc."""
+    __tablename__ = "ai_workloads"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    project_id          = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    node_id             = Column(Integer, ForeignKey("hardware_nodes.id"), nullable=True)
+    pipeline_id         = Column(Integer, ForeignKey("inference_pipelines.id"), nullable=True)
+
+    name                = Column(String, nullable=False)
+    workload_type       = Column(SQLEnum(WorkloadType), nullable=False)
+    model_name          = Column(String)          # e.g., "llama-3-70b", "stable-diffusion-xl"
+    model_version       = Column(String)
+    framework           = Column(SQLEnum(ModelFramework))
+    model_params_b      = Column(Float)           # billions of parameters
+    quantization        = Column(String)          # fp32, fp16, int8, int4, gguf
+
+    # Timing
+    started_at          = Column(DateTime(timezone=True))
+    ended_at            = Column(DateTime(timezone=True))
+    duration_seconds    = Column(Float)
+
+    # Energy & Carbon
+    total_energy_kwh    = Column(Float)
+    total_carbon_g_co2e = Column(Float)
+    avg_power_watts     = Column(Float)
+    peak_power_watts    = Column(Float)
+    pue_factor          = Column(Float, default=1.2)  # Power Usage Effectiveness
+
+    # Performance
+    total_tokens        = Column(Integer)
+    total_requests      = Column(Integer)
+    avg_latency_ms      = Column(Float)
+    p99_latency_ms      = Column(Float)
+    throughput_tps      = Column(Float)           # tokens per second
+
+    # Cost
+    compute_cost_usd    = Column(Float)
+    energy_cost_usd     = Column(Float)
+    cost_per_1k_tokens  = Column(Float)
+
+    # Green Score (0–100)
+    green_score         = Column(Float)
+    green_score_breakdown = Column(JSON)
+
+    status              = Column(String, default="running")  # running|completed|failed
+    tags                = Column(JSON)
+    metadata_           = Column("metadata", JSON)
+
+    project             = relationship("Project", back_populates="workloads")
+    node                = relationship("HardwareNode", back_populates="workloads")
+    telemetry           = relationship("GPUTelemetry", back_populates="workload")
+    pipeline            = relationship("InferencePipeline", back_populates="workloads")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inference Pipelines
+# ─────────────────────────────────────────────────────────────────────────────
+
+class InferencePipeline(Base):
+    """A named inference pipeline (e.g., 'prod-chat-llama3', 'image-gen-sdxl')."""
+    __tablename__ = "inference_pipelines"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    project_id          = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    name                = Column(String, nullable=False)
+    description         = Column(Text)
+    model_name          = Column(String)
+    framework           = Column(SQLEnum(ModelFramework))
+    deployment          = Column(SQLEnum(DeploymentTarget))
+    is_active           = Column(Boolean, default=True)
+    created_at          = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at          = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Aggregate green metrics (updated on each workload completion)
+    current_green_score = Column(Float, default=0.0)
+    total_energy_kwh    = Column(Float, default=0.0)
+    total_carbon_kg     = Column(Float, default=0.0)
+    total_requests      = Column(Integer, default=0)
+    avg_latency_ms      = Column(Float)
+    carbon_per_request_g = Column(Float)
+
+    project             = relationship("Project", back_populates="pipelines")
+    workloads           = relationship("AIWorkload", back_populates="pipeline")
+    recommendations     = relationship("OptimizationRecommendation", back_populates="pipeline")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Optimization Recommendations
+# ─────────────────────────────────────────────────────────────────────────────
+
+class RecommendationType(str, enum.Enum):
+    QUANTIZATION        = "quantization"
+    BATCHING            = "batching"
+    HARDWARE_SWITCH     = "hardware_switch"
+    REGION_SHIFT        = "region_shift"
+    SCHEDULING          = "scheduling"
+    MODEL_PRUNING       = "model_pruning"
+    CACHING             = "caching"
+    EDGE_OFFLOAD        = "edge_offload"
+    CLOUD_MIGRATION     = "cloud_migration"
+
+
+class RecommendationPriority(str, enum.Enum):
+    CRITICAL    = "critical"
+    HIGH        = "high"
+    MEDIUM      = "medium"
+    LOW         = "low"
+
+
+class OptimizationRecommendation(Base):
+    __tablename__ = "optimization_recommendations"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    pipeline_id         = Column(Integer, ForeignKey("inference_pipelines.id"), nullable=False)
+    rec_type            = Column(SQLEnum(RecommendationType), nullable=False)
+    priority            = Column(SQLEnum(RecommendationPriority), default=RecommendationPriority.MEDIUM)
+    title               = Column(String, nullable=False)
+    description         = Column(Text)
+    rationale           = Column(Text)
+
+    # Projected impact
+    estimated_energy_saving_pct = Column(Float)   # % reduction in energy
+    estimated_carbon_saving_pct = Column(Float)
+    estimated_cost_saving_usd   = Column(Float)   # monthly
+    estimated_latency_change_pct = Column(Float)  # negative = improvement
+    confidence_score    = Column(Float)           # 0–1
+
+    # Action
+    action_steps        = Column(JSON)            # list of strings
+    before_config       = Column(JSON)
+    after_config        = Column(JSON)
+
+    is_applied          = Column(Boolean, default=False)
+    applied_at          = Column(DateTime(timezone=True))
+    created_at          = Column(DateTime(timezone=True), server_default=func.now())
+
+    pipeline            = relationship("InferencePipeline", back_populates="recommendations")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Carbon-Aware Scheduling Events
+# ─────────────────────────────────────────────────────────────────────────────
+
+class SchedulingEvent(Base):
+    """Records when and why a workload was deferred/routed for carbon reasons."""
+    __tablename__ = "scheduling_events"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    workload_id         = Column(Integer, ForeignKey("ai_workloads.id"), nullable=False)
+    event_type          = Column(String)   # deferred | rerouted | cancelled | executed
+    original_region     = Column(SQLEnum(GridRegion))
+    selected_region     = Column(SQLEnum(GridRegion))
+    original_intensity  = Column(Float)   # gCO2e/kWh
+    selected_intensity  = Column(Float)
+    carbon_saved_g      = Column(Float)
+    reason              = Column(Text)
+    timestamp           = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Grid Carbon Intensity (live / cached)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class GridIntensitySnapshot(Base):
+    __tablename__ = "grid_intensity_snapshots"
+
+    id          = Column(Integer, primary_key=True, index=True)
+    region      = Column(SQLEnum(GridRegion), nullable=False, index=True)
+    intensity   = Column(Float, nullable=False)   # gCO2e/kWh
+    source      = Column(String, default="electricitymap")
+    renewable_pct = Column(Float)
+    timestamp   = Column(DateTime(timezone=True), server_default=func.now(), index=True)

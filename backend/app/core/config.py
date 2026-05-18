@@ -2,55 +2,35 @@ import os
 from typing import List
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
-    # API Settings
     PROJECT_NAME: str = "CarbonSense"
-    VERSION: str = "1.0.0"
+    VERSION: str = "2.0.0"
     DEBUG: bool = True
-    
-    # Database
-    DATABASE_URL: str = "postgresql://username:password@localhost:5432/carbonsense"
-    
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379"
-    
-    # Security
-    SECRET_KEY: str = "your-super-secret-key-change-this-in-production"
+
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./carbonsense.db")
+
+    SECRET_KEY: str = "carbonsense-ai-observability-secret-change-in-prod"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    
-    # CORS
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
-        "http://localhost:19006",
-        "https://carbonsense.com",
-        "https://app.carbonsense.com"
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "http://0.0.0.0:3000",
     ]
-    
-    # External APIs
-    GOOGLE_MAPS_API_KEY: str = ""
-    OPENWEATHER_API_KEY: str = ""
-    NASA_API_KEY: str = ""
-    
-    # Email
-    SMTP_HOST: str = "smtp.gmail.com"
-    SMTP_PORT: int = 587
-    SMTP_USER: str = ""
-    SMTP_PASSWORD: str = ""
-    
-    # Cloud Storage
-    AWS_ACCESS_KEY_ID: str = ""
-    AWS_SECRET_ACCESS_KEY: str = ""
-    AWS_BUCKET_NAME: str = "carbonsense-assets"
-    AWS_REGION: str = "us-east-1"
-    
-    # Payment
-    STRIPE_SECRET_KEY: str = ""
-    STRIPE_WEBHOOK_SECRET: str = ""
-    
+
+    # Grid carbon intensity defaults (gCO2e/kWh) by region
+    GRID_INTENSITY_US_EAST: float = 386.0
+    GRID_INTENSITY_US_WEST: float = 210.0
+    GRID_INTENSITY_EU_WEST: float = 233.0
+    GRID_INTENSITY_ASIA_PACIFIC: float = 520.0
+    GRID_INTENSITY_UK: float = 207.0
+
     class Config:
         env_file = ".env"
         case_sensitive = True
+
 
 settings = Settings()
